@@ -16,11 +16,13 @@ namespace PictureSorter
     public partial class Form1 : Form
     {
         private readonly ImageList imageList;
-        private readonly Dictionary<string, Image> imageCache = new Dictionary<string, Image>();
+        private readonly Dictionary<string, ImageInfo> imageCache =
+            new Dictionary<string, ImageInfo>();
+        ImageInfo selectedImageInfo = null;
 
         readonly string[] filters = new string[] { "*.png", "*.jpg", "*.jpeg", "*.bmp" };
 
-        string filepath = @"C:\Users\nicol\Pictures\Screenshots";
+        string filepath = @"C:\Users\nicol\Pictures\Aletsch 2022 2";
 
         public Form1()
         {
@@ -51,7 +53,8 @@ namespace PictureSorter
                 string imageFileName = Path.GetFileNameWithoutExtension(imageFile);
 
                 Image image = Image.FromFile(imageFile);
-                imageCache[imageFileName] = image;
+                ImageInfo imageInfo = new ImageInfo { Image = image, Index = imageIndex };
+                imageCache[imageFileName] = imageInfo;
 
                 imageList.Images.Add(image);
 
@@ -62,6 +65,7 @@ namespace PictureSorter
                     Text = imageFileName
                 };
 
+                imageInfo.Node = node;
                 treeView1.Nodes.Add(node);
                 imageIndex++;
             }
@@ -70,7 +74,25 @@ namespace PictureSorter
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
             string selectedFilePath = e.Node.FullPath;
-            pictureBox1.Image = imageCache[selectedFilePath];
+            selectedImageInfo = imageCache[selectedFilePath];
+            pictureBox1.Image = selectedImageInfo.Image;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            selectedImageInfo.IsSelected = !selectedImageInfo.IsSelected;
+            selectedImageInfo.Node.BackColor = selectedImageInfo.IsSelected
+                ? Color.LightGreen
+                : SystemColors.Control;
+        }
+
+        private class ImageInfo
+        {
+            public Image Image { get; set; }
+            public int Index { get; set; }
+            public bool IsSelected { get; set; } = true;
+
+            public TreeNode Node { get; set; }
         }
     }
 }
