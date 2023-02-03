@@ -5,74 +5,63 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace PictureSorter
 {
     public partial class Form1 : Form
     {
-        private List<Image> images;
+        private ImageList imageList;
+        private Dictionary<string, Image> imageCache = new Dictionary<string, Image>();
+
+        string filepath = @"C:\Users\nicol\Pictures\Screenshots";
 
         public Form1()
         {
             InitializeComponent();
 
-            images = LoadImagesFromFolder("C:\\Users\\nicol\\Pictures\\Screenshots");
-            PopulateListView(images);
+            imageList = new ImageList();
+            imageList.ImageSize = new Size(64, 64);
+            treeView1.ImageList = imageList;
         }
 
-        private void PopulateListView(List<Image> images)
+        private void Form1_Load(object sender, EventArgs e)
         {
-            listView1.View = View.LargeIcon;
-            listView1.LargeImageList = new ImageList();
-            //listView1.LargeImageList.ImageSize = new Size(64, 64);
-            listView1.TileSize = new Size(64, 64);
+            LoadImages();
+        }
+
+        private void LoadImages()
+        {
+            string[] imageFiles = Directory.GetFiles(filepath, "*.png");
+            imageCache.Clear();
 
             int imageIndex = 0;
-            foreach (Image image in images)
+            foreach (string imageFile in imageFiles)
             {
-                listView1.LargeImageList.Images.Add(image);
-                ListViewItem item = new ListViewItem();
-                item.ImageIndex = imageIndex;
-                item.Text = "Image " + (imageIndex + 1);
+                string imageFileName = Path.GetFileNameWithoutExtension(imageFile);
+                Image image = Image.FromFile(imageFile);
+                imageCache[imageFileName] = image;
 
-                listView1.Items.Add(item);
+                imageList.Images.Add(image);
+
+                TreeNode node = new TreeNode();
+                node.ImageIndex = imageIndex;
+                node.SelectedImageIndex = imageIndex;
+                node.Text = imageFileName;
+
+                treeView1.Nodes.Add(node);
                 imageIndex++;
             }
-
-            listView1.OwnerDraw = false;
-            //listView1.DrawItem += ListView1_DrawItem;
         }
 
-        private void ListView1_DrawItem(object sender, DrawListViewItemEventArgs e)
+        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            e.Graphics.InterpolationMode = System
-                .Drawing
-                .Drawing2D
-                .InterpolationMode
-                .HighQualityBilinear;
-            e.Graphics.DrawImage(listView1.LargeImageList.Images[e.Item.ImageIndex], e.Bounds);
-        }
-
-        static List<Image> LoadImagesFromFolder(string folderPath)
-        {
-            List<Image> images = new List<Image>();
-            string[] filePaths = Directory.GetFiles(folderPath, "*.*");
-            foreach (string filePath in filePaths)
-            {
-                try
-                {
-                    images.Add(Image.FromFile(filePath));
-                }
-                catch (OutOfMemoryException)
-                {
-                    // Some file types, such as non-image files, may cause exceptions to be thrown.
-                    // You can handle these exceptions and continue processing other files if desired.
-                }
-            }
-            return images;
+            string selectedFilePath = e.Node.FullPath;
+            pictureBox1.Image = imageCache[selectedFilePath];
         }
     }
 }
