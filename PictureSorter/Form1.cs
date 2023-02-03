@@ -15,8 +15,10 @@ namespace PictureSorter
 {
     public partial class Form1 : Form
     {
-        private ImageList imageList;
-        private Dictionary<string, Image> imageCache = new Dictionary<string, Image>();
+        private readonly ImageList imageList;
+        private readonly Dictionary<string, Image> imageCache = new Dictionary<string, Image>();
+
+        readonly string[] filters = new string[] { "*.png", "*.jpg", "*.jpeg", "*.bmp" };
 
         string filepath = @"C:\Users\nicol\Pictures\Screenshots";
 
@@ -24,8 +26,7 @@ namespace PictureSorter
         {
             InitializeComponent();
 
-            imageList = new ImageList();
-            imageList.ImageSize = new Size(64, 64);
+            imageList = new ImageList { ImageSize = new Size(64, 64) };
             treeView1.ImageList = imageList;
         }
 
@@ -36,22 +37,30 @@ namespace PictureSorter
 
         private void LoadImages()
         {
-            string[] imageFiles = Directory.GetFiles(filepath, "*.png");
+            List<string> imageFiles = new List<string>();
+            foreach (string filter in filters)
+            {
+                imageFiles.AddRange(Directory.GetFiles(filepath, filter));
+            }
+
             imageCache.Clear();
 
             int imageIndex = 0;
             foreach (string imageFile in imageFiles)
             {
                 string imageFileName = Path.GetFileNameWithoutExtension(imageFile);
+
                 Image image = Image.FromFile(imageFile);
                 imageCache[imageFileName] = image;
 
                 imageList.Images.Add(image);
 
-                TreeNode node = new TreeNode();
-                node.ImageIndex = imageIndex;
-                node.SelectedImageIndex = imageIndex;
-                node.Text = imageFileName;
+                TreeNode node = new TreeNode
+                {
+                    ImageIndex = imageIndex,
+                    SelectedImageIndex = imageIndex,
+                    Text = imageFileName
+                };
 
                 treeView1.Nodes.Add(node);
                 imageIndex++;
