@@ -13,7 +13,10 @@ namespace PictureSorter
         public static readonly Color colorSelected = Color.LightGreen,
             colorNotSelected = Color.Salmon;
 
+        [JsonIgnore]
         public string FullPath { get; set; }
+
+        [JsonIgnore]
         public int Index { get; set; }
         private bool _isSelected = true;
         public bool IsSelected

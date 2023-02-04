@@ -39,6 +39,10 @@
             this.exporterLesImaesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.quitterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.généralToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.réinitialisertoutSélectionnerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toutCocherToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toutDécocherToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.voirLaideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.v110ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -104,6 +108,7 @@
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fichierToolStripMenuItem,
+            this.généralToolStripMenuItem,
             this.aideToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -149,6 +154,7 @@
             this.exporterLesImaesToolStripMenuItem.Name = "exporterLesImaesToolStripMenuItem";
             this.exporterLesImaesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exporterLesImaesToolStripMenuItem.Text = "Exporter les images";
+            this.exporterLesImaesToolStripMenuItem.Click += new System.EventHandler(this.exporterLesImaesToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
@@ -161,6 +167,37 @@
             this.quitterToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.quitterToolStripMenuItem.Text = "Quitter";
             this.quitterToolStripMenuItem.Click += new System.EventHandler(this.quitterToolStripMenuItem_Click);
+            // 
+            // généralToolStripMenuItem
+            // 
+            this.généralToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.réinitialisertoutSélectionnerToolStripMenuItem});
+            this.généralToolStripMenuItem.Name = "généralToolStripMenuItem";
+            this.généralToolStripMenuItem.Size = new System.Drawing.Size(59, 22);
+            this.généralToolStripMenuItem.Text = "Général";
+            // 
+            // réinitialisertoutSélectionnerToolStripMenuItem
+            // 
+            this.réinitialisertoutSélectionnerToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toutCocherToolStripMenuItem,
+            this.toutDécocherToolStripMenuItem});
+            this.réinitialisertoutSélectionnerToolStripMenuItem.Name = "réinitialisertoutSélectionnerToolStripMenuItem";
+            this.réinitialisertoutSélectionnerToolStripMenuItem.Size = new System.Drawing.Size(234, 22);
+            this.réinitialisertoutSélectionnerToolStripMenuItem.Text = "Réinitialiser (tout sélectionner)";
+            // 
+            // toutCocherToolStripMenuItem
+            // 
+            this.toutCocherToolStripMenuItem.Name = "toutCocherToolStripMenuItem";
+            this.toutCocherToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.toutCocherToolStripMenuItem.Text = "Tout cocher";
+            this.toutCocherToolStripMenuItem.Click += new System.EventHandler(this.toutCocherToolStripMenuItem_Click);
+            // 
+            // toutDécocherToolStripMenuItem
+            // 
+            this.toutDécocherToolStripMenuItem.Name = "toutDécocherToolStripMenuItem";
+            this.toutDécocherToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.toutDécocherToolStripMenuItem.Text = "Tout décocher";
+            this.toutDécocherToolStripMenuItem.Click += new System.EventHandler(this.toutDécocherToolStripMenuItem_Click);
             // 
             // aideToolStripMenuItem
             // 
@@ -181,7 +218,7 @@
             // v110ToolStripMenuItem
             // 
             this.v110ToolStripMenuItem.Name = "v110ToolStripMenuItem";
-            this.v110ToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
+            this.v110ToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.v110ToolStripMenuItem.Text = "v1.1.0";
             // 
             // panel1
@@ -199,10 +236,10 @@
             this.button1.Location = new System.Drawing.Point(8, 4);
             this.button1.Margin = new System.Windows.Forms.Padding(2);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(67, 40);
+            this.button1.Size = new System.Drawing.Size(101, 40);
             this.button1.TabIndex = 10;
             this.button1.TabStop = false;
-            this.button1.Text = "button1";
+            this.button1.Text = "Sélectionner / Désélectionner";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -219,7 +256,7 @@
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.Text = "Form1";
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.Shown += new System.EventHandler(this.Form1_Shown);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.splitContainer1.Panel1.ResumeLayout(false);
@@ -252,6 +289,10 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem quitterToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem généralToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem réinitialisertoutSélectionnerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toutCocherToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toutDécocherToolStripMenuItem;
     }
 }
 

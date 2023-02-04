@@ -3,12 +3,12 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Timers;
 using System.Windows;
 using System.Windows.Forms;
+using MessageBox = System.Windows.MessageBox;
 using Size = System.Drawing.Size;
 
 namespace PictureSorter
@@ -23,21 +23,14 @@ namespace PictureSorter
 
         readonly string[] filters = new string[] { "*.png", "*.jpg", "*.jpeg", "*.bmp" };
 
-        bool previewImage = false;
+        private const bool previewImage = false;
 
-        private string saveFileName = "pictureSelector.pssave";
+        private const string saveFileName = "pictureSelector.pssave";
         public string SelectedFolder = string.Empty;
-
-        // 1min auto save timer
-        //public System.Timers.Timer tmrAutoUpdate = new Timer(1000 * 60 * 1);
 
         public Form1()
         {
             InitializeComponent();
-
-            //tmrAutoUpdate.AutoReset = true;
-            //tmrAutoUpdate.Elapsed += TmrAutoUpdate_Elapsed;
-            //tmrAutoUpdate.Start();
 
             SelectedColorControl = panel1;
 
@@ -46,7 +39,10 @@ namespace PictureSorter
             treeView1.ImageList = previewImage ? imageList : null;
         }
 
-        private void Form1_Load(object sender, EventArgs e) { }
+        private void Form1_Shown(object sender, EventArgs e)
+        {
+            ChooseFolder();
+        }
 
         private void ChooseFolder()
         {
@@ -65,7 +61,7 @@ namespace PictureSorter
         /// <summary>
         ///
         /// </summary>
-        private void SaveToFile()
+        private void SaveToFile(bool backup = false)
         {
             if (!Directory.Exists(SelectedFolder))
                 return;
@@ -77,9 +73,11 @@ namespace PictureSorter
             if (File.Exists(savePath))
                 File.SetAttributes(savePath, FileAttributes.Normal);
 
-            SettingsManager.SaveTo(savePath, imageInfoCache, false, true);
+            SettingsManager.SaveTo(savePath, imageInfoCache, backup, true);
 
             File.SetAttributes(savePath, FileAttributes.Hidden);
+
+            Console.WriteLine("Saved !");
         }
 
         /// <summary>
@@ -105,16 +103,6 @@ namespace PictureSorter
             }
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void TmrAutoUpdate_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            SaveToFile();
-        }
-
         #region Image management
 
         /// <summary>
@@ -125,10 +113,6 @@ namespace PictureSorter
         {
             if (!Directory.Exists(directoryPath))
                 return;
-
-            // Restart auto save timer
-            //tmrAutoUpdate.Stop();
-            //tmrAutoUpdate.Start();
 
             SelectedFolder = directoryPath;
 
@@ -177,7 +161,8 @@ namespace PictureSorter
                 imageIndex++;
             }
 
-            UpdateFromSave();
+            UpdateFromSave(); // Update selection from save
+            SaveToFile(); // Save. Maybe more images, maybe no save yet
 
             if (imageInfoCache.Count > 0)
                 treeView1.SelectedNode = treeView1.Nodes[0];
@@ -205,10 +190,11 @@ namespace PictureSorter
         private void button1_Click(object sender, EventArgs e)
         {
             ToggleSelectedImage();
+            treeView1.Focus();
         }
 
         /// <summary>
-        ///
+        /// Change the selection state of the selected image
         /// </summary>
         private void ToggleSelectedImage()
         {
@@ -222,6 +208,8 @@ namespace PictureSorter
             // Update picturebox image (border)
             pictureBox1.Image = selectedImageInfo.ReapplyBorder(pictureBox1.Image);
             GC.Collect();
+
+            SaveToFile();
         }
 
         /// <summary>
@@ -296,6 +284,73 @@ namespace PictureSorter
                 MessageBoxButton.OK,
                 MessageBoxImage.Question
             );
+        }
+
+        private void toutCocherToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Backup current save
+            SaveToFile(true);
+
+            foreach (ImageInfo imageInfo in imageInfoCache.Values)
+            {
+                imageInfo.IsSelected = true;
+            }
+        }
+
+        private void toutDécocherToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Backup current save
+            SaveToFile(true);
+
+            foreach (ImageInfo imageInfo in imageInfoCache.Values)
+            {
+                imageInfo.IsSelected = false;
+            }
+        }
+
+        private void exporterLesImaesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ExportSelectedImages();
+        }
+
+        private void ExportSelectedImages()
+        {
+            var selectedImages = imageInfoCache.Where((x) => x.Value.IsSelected);
+
+            if (0 == selectedImages.Count())
+            {
+                MessageBox.Show(
+                    "Pas d'image sélectionnée trouvée",
+                    "Erreur",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+                return;
+            }
+
+            string folderSavePath = Path.Combine(
+                Path.GetDirectoryName(SelectedFolder),
+                Path.GetFileName(SelectedFolder) + " tri "
+            );
+
+            int counter = 1;
+            while (Directory.Exists(folderSavePath + counter))
+            {
+                counter++;
+            }
+            folderSavePath += counter;
+            Directory.CreateDirectory(folderSavePath);
+
+            Console.WriteLine($"Saving to '{folderSavePath}'");
+
+            foreach (var file in selectedImages)
+            {
+                string srcPath = Path.Combine(SelectedFolder, file.Key);
+                string destPath = Path.Combine(folderSavePath, file.Key);
+                File.Copy(srcPath, destPath, false);
+            }
+
+            Process.Start(folderSavePath);
         }
     }
 }
