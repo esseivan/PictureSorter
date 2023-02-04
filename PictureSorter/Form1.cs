@@ -25,7 +25,7 @@ namespace PictureSorter
 
         bool previewImage = false;
 
-        string filepath = @"C:\Users\nicol\Pictures\Aletsch 2022 2";
+        string filepath = @"C:\Users\nicol\Pictures\Aletsch 2018";
 
         //string filepath = @"C:\Users\nicol\Pictures\Screenshots";
 
@@ -40,15 +40,15 @@ namespace PictureSorter
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            LoadImages();
+            LoadImages(filepath);
         }
 
-        private void LoadImages()
+        private void LoadImages(string directoryPath)
         {
             List<string> imageFiles = new List<string>();
             foreach (string filter in filters)
             {
-                imageFiles.AddRange(Directory.GetFiles(filepath, filter));
+                imageFiles.AddRange(Directory.GetFiles(directoryPath, filter));
             }
 
             imageCache.Clear();
@@ -115,10 +115,6 @@ namespace PictureSorter
         /// </summary>
         private class ImageInfo
         {
-            private static int cacheSize = 10;
-            private static Queue<ImageInfo> imagesCached = new Queue<ImageInfo>(cacheSize);
-
-            public Image CachedImage { get; set; }
             public string FullPath { get; set; }
             public int Index { get; set; }
             private bool _isSelected = true;
@@ -136,13 +132,9 @@ namespace PictureSorter
 
             public Image ReadImage()
             {
-                if (null == CachedImage)
-                {
-                    CachedImage = Image.FromFile(FullPath);
-                    AddCache();
-                }
+                Image outputImage = Image.FromFile(FullPath);
 
-                return CachedImage;
+                return outputImage;
             }
 
             public Image GetThumbnail()
@@ -155,22 +147,6 @@ namespace PictureSorter
             public void ToggleSelection()
             {
                 IsSelected = !IsSelected;
-            }
-
-            public void AddCache()
-            {
-                // Decache image
-                if (imagesCached.Count >= cacheSize)
-                {
-                    ImageInfo imageInfo = imagesCached.Dequeue();
-                    imageInfo.CachedImage = null;
-                    GC.Collect();
-                    Console.WriteLine("Dequeued. Count is " + imagesCached.Count);
-                }
-
-                // cache image
-                imagesCached.Enqueue(this);
-                Console.WriteLine("Enqueued. Count is " + imagesCached.Count);
             }
         }
     }

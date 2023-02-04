@@ -50,9 +50,10 @@
             // pictureBox1
             // 
             this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBox1.Location = new System.Drawing.Point(3, 3);
+            this.pictureBox1.Location = new System.Drawing.Point(2, 2);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(1102, 658);
+            this.pictureBox1.Size = new System.Drawing.Size(646, 398);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
@@ -60,49 +61,51 @@
             // treeView1
             // 
             this.treeView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView1.Location = new System.Drawing.Point(3, 3);
+            this.treeView1.Location = new System.Drawing.Point(2, 2);
+            this.treeView1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(260, 658);
+            this.treeView1.Size = new System.Drawing.Size(262, 398);
             this.treeView1.TabIndex = 1;
             this.treeView1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView1_AfterSelect);
             // 
             // splitContainer1
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Location = new System.Drawing.Point(0, 26);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.Controls.Add(this.treeView1);
-            this.splitContainer1.Panel1.Padding = new System.Windows.Forms.Padding(3);
+            this.splitContainer1.Panel1.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.pictureBox1);
-            this.splitContainer1.Panel2.Padding = new System.Windows.Forms.Padding(3);
-            this.splitContainer1.Size = new System.Drawing.Size(1378, 664);
+            this.splitContainer1.Panel2.Padding = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.splitContainer1.Size = new System.Drawing.Size(919, 402);
             this.splitContainer1.SplitterDistance = 266;
+            this.splitContainer1.SplitterWidth = 3;
             this.splitContainer1.TabIndex = 2;
             // 
             // menuStrip1
             // 
-            this.menuStrip1.GripMargin = new System.Windows.Forms.Padding(2, 2, 0, 2);
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fichierToolStripMenuItem,
             this.aideToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1378, 33);
+            this.menuStrip1.Padding = new System.Windows.Forms.Padding(4, 1, 0, 1);
+            this.menuStrip1.Size = new System.Drawing.Size(919, 24);
             this.menuStrip1.TabIndex = 3;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // fichierToolStripMenuItem
             // 
             this.fichierToolStripMenuItem.Name = "fichierToolStripMenuItem";
-            this.fichierToolStripMenuItem.Size = new System.Drawing.Size(78, 29);
+            this.fichierToolStripMenuItem.Size = new System.Drawing.Size(54, 22);
             this.fichierToolStripMenuItem.Text = "Fichier";
             // 
             // aideToolStripMenuItem
@@ -111,35 +114,37 @@
             this.voirLaideToolStripMenuItem,
             this.v110ToolStripMenuItem});
             this.aideToolStripMenuItem.Name = "aideToolStripMenuItem";
-            this.aideToolStripMenuItem.Size = new System.Drawing.Size(64, 29);
+            this.aideToolStripMenuItem.Size = new System.Drawing.Size(43, 22);
             this.aideToolStripMenuItem.Text = "Aide";
             // 
             // voirLaideToolStripMenuItem
             // 
             this.voirLaideToolStripMenuItem.Name = "voirLaideToolStripMenuItem";
-            this.voirLaideToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
+            this.voirLaideToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
             this.voirLaideToolStripMenuItem.Text = "Voir l\'aide";
             // 
             // v110ToolStripMenuItem
             // 
             this.v110ToolStripMenuItem.Name = "v110ToolStripMenuItem";
-            this.v110ToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
+            this.v110ToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
             this.v110ToolStripMenuItem.Text = "v1.1.0";
             // 
             // panel1
             // 
             this.panel1.Controls.Add(this.button1);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 664);
+            this.panel1.Location = new System.Drawing.Point(0, 432);
+            this.panel1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1378, 80);
+            this.panel1.Size = new System.Drawing.Size(919, 52);
             this.panel1.TabIndex = 0;
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(12, 6);
+            this.button1.Location = new System.Drawing.Point(8, 4);
+            this.button1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(100, 62);
+            this.button1.Size = new System.Drawing.Size(67, 40);
             this.button1.TabIndex = 0;
             this.button1.Text = "button1";
             this.button1.UseVisualStyleBackColor = true;
@@ -147,13 +152,14 @@
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1378, 744);
+            this.ClientSize = new System.Drawing.Size(919, 484);
             this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.panel1);
             this.MainMenuStrip = this.menuStrip1;
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
