@@ -7,7 +7,9 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Timers;
+using System.Windows;
 using System.Windows.Forms;
+using Size = System.Drawing.Size;
 
 namespace PictureSorter
 {
@@ -210,6 +212,9 @@ namespace PictureSorter
         /// </summary>
         private void ToggleSelectedImage()
         {
+            if (null == selectedImageInfo)
+                return;
+
             selectedImageInfo.ToggleSelection();
 
             UpdateIsSelectedBackground();
@@ -264,7 +269,7 @@ namespace PictureSorter
             {
                 case Keys.Space:
                 case Keys.Enter:
-                    button1.PerformClick();
+                    ToggleSelectedImage();
                     break;
                 default:
                     e.SuppressKeyPress = false;
@@ -277,6 +282,20 @@ namespace PictureSorter
         private void quitterToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        private void voirLaideToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string helpStr =
+                "1. Aller sous Fichier -> Ouvrir pour choisir un DOSSIER contenant les images à sélectionner\n\n"
+                + "2. Sélectionner les images en utilisant les flèches Haut et Bas et la barre Espace\n\n"
+                + "3. Aller sous Fichier -> Exporter pour choisir un DOSSIER où copier les images sélectionnées";
+            System.Windows.MessageBox.Show(
+                helpStr,
+                "Aide",
+                MessageBoxButton.OK,
+                MessageBoxImage.Question
+            );
         }
     }
 }

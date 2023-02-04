@@ -174,8 +174,9 @@
             // voirLaideToolStripMenuItem
             // 
             this.voirLaideToolStripMenuItem.Name = "voirLaideToolStripMenuItem";
-            this.voirLaideToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
+            this.voirLaideToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.voirLaideToolStripMenuItem.Text = "Voir l\'aide";
+            this.voirLaideToolStripMenuItem.Click += new System.EventHandler(this.voirLaideToolStripMenuItem_Click);
             // 
             // v110ToolStripMenuItem
             // 
