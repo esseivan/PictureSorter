@@ -339,21 +339,11 @@ namespace PictureSorter
             }
         }
 
-        private void treeView1_KeyDown(object sender, KeyEventArgs e)
-        {
-            Console.WriteLine($"treeView1_KeyDown Key pressed {e.KeyCode}");
-        }
-
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            Console.WriteLine($"Form1_KeyDown Key pressed {e.KeyCode}");
             e.SuppressKeyPress = true;
             switch (e.KeyCode)
             {
-                case Keys.A:
-                    if (Keys.Control == e.Modifiers)
-                        treeView1.SelectedNode = null;
-                    break;
                 case Keys.Space:
                 case Keys.Enter:
                     button1.PerformClick();
