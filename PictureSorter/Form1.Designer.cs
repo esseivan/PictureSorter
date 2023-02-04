@@ -33,6 +33,12 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fichierToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ouvrirToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sauvegarderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.exporterLesImaesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.quitterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.voirLaideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.v110ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -108,9 +114,53 @@
             // 
             // fichierToolStripMenuItem
             // 
+            this.fichierToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ouvrirToolStripMenuItem,
+            this.sauvegarderToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.exporterLesImaesToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.quitterToolStripMenuItem});
             this.fichierToolStripMenuItem.Name = "fichierToolStripMenuItem";
             this.fichierToolStripMenuItem.Size = new System.Drawing.Size(54, 22);
             this.fichierToolStripMenuItem.Text = "Fichier";
+            // 
+            // ouvrirToolStripMenuItem
+            // 
+            this.ouvrirToolStripMenuItem.Name = "ouvrirToolStripMenuItem";
+            this.ouvrirToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ouvrirToolStripMenuItem.Text = "Ouvrir sauvegarde";
+            this.ouvrirToolStripMenuItem.Click += new System.EventHandler(this.ouvrirToolStripMenuItem_Click);
+            // 
+            // sauvegarderToolStripMenuItem
+            // 
+            this.sauvegarderToolStripMenuItem.Name = "sauvegarderToolStripMenuItem";
+            this.sauvegarderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.sauvegarderToolStripMenuItem.Text = "Sauvegarder";
+            this.sauvegarderToolStripMenuItem.Click += new System.EventHandler(this.sauvegarderToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+            // 
+            // exporterLesImaesToolStripMenuItem
+            // 
+            this.exporterLesImaesToolStripMenuItem.Name = "exporterLesImaesToolStripMenuItem";
+            this.exporterLesImaesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exporterLesImaesToolStripMenuItem.Text = "Exporter les images";
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            // 
+            // quitterToolStripMenuItem
+            // 
+            this.quitterToolStripMenuItem.Name = "quitterToolStripMenuItem";
+            this.quitterToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.quitterToolStripMenuItem.Text = "Quitter";
+            this.quitterToolStripMenuItem.Click += new System.EventHandler(this.quitterToolStripMenuItem_Click);
             // 
             // aideToolStripMenuItem
             // 
@@ -195,6 +245,12 @@
         private System.Windows.Forms.ToolStripMenuItem v110ToolStripMenuItem;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.ToolStripMenuItem ouvrirToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sauvegarderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exporterLesImaesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem quitterToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
     }
 }
 

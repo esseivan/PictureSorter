@@ -1,18 +1,12 @@
-﻿using System;
+﻿using ESNLib.Tools;
+using Microsoft.WindowsAPICodePack.Dialogs;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
-using System.Net.NetworkInformation;
-using System.Runtime.Remoting.Messaging;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
 
 namespace PictureSorter
@@ -29,16 +23,19 @@ namespace PictureSorter
 
         bool previewImage = false;
 
-        string filepath = @"C:\Users\nicol\Pictures\Aletsch 2018";
+        private string saveFileName = "pictureSelector.pssave";
+        public string SelectedFolder = string.Empty;
 
-        //string filepath = @"C:\Users\nicol\Pictures\Screenshots";
-
-        public static readonly Color colorSelected = Color.LightGreen,
-            colorNotSelected = Color.Salmon;
+        // 1min auto save timer
+        //public System.Timers.Timer tmrAutoUpdate = new Timer(1000 * 60 * 1);
 
         public Form1()
         {
             InitializeComponent();
+
+            //tmrAutoUpdate.AutoReset = true;
+            //tmrAutoUpdate.Elapsed += TmrAutoUpdate_Elapsed;
+            //tmrAutoUpdate.Start();
 
             SelectedColorControl = panel1;
 
@@ -47,26 +44,105 @@ namespace PictureSorter
             treeView1.ImageList = previewImage ? imageList : null;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void Form1_Load(object sender, EventArgs e) { }
+
+        private void ChooseFolder()
         {
-            LoadImages(filepath);
+            var dialog = new CommonOpenFileDialog("Sélectionner le dossier contenant les images")
+            {
+                IsFolderPicker = true
+            };
+            CommonFileDialogResult result = dialog.ShowDialog();
+
+            if (result == CommonFileDialogResult.Ok)
+            {
+                LoadImages(dialog.FileName);
+            }
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        private void SaveToFile()
+        {
+            if (!Directory.Exists(SelectedFolder))
+                return;
+
+            if (imageInfoCache.Count == 0)
+                return;
+
+            string savePath = Path.Combine(SelectedFolder, saveFileName);
+            if (File.Exists(savePath))
+                File.SetAttributes(savePath, FileAttributes.Normal);
+
+            SettingsManager.SaveTo(savePath, imageInfoCache, false, true);
+
+            File.SetAttributes(savePath, FileAttributes.Hidden);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        private void UpdateFromSave()
+        {
+            string savePath = Path.Combine(SelectedFolder, saveFileName);
+
+            if (!File.Exists(savePath))
+                return;
+
+            if (!SettingsManager.LoadFrom(savePath, out Dictionary<string, ImageInfo> loadedData))
+                return;
+
+            // Apply only the IsSelected property
+            foreach (var dataItem in loadedData)
+            {
+                if (imageInfoCache.ContainsKey(dataItem.Key))
+                {
+                    imageInfoCache[dataItem.Key].IsSelected = dataItem.Value.IsSelected;
+                }
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TmrAutoUpdate_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            SaveToFile();
+        }
+
+        #region Image management
+
+        /// <summary>
+        /// Load images in the specified directory
+        /// </summary>
+        /// <param name="directoryPath"></param>
         private void LoadImages(string directoryPath)
         {
+            if (!Directory.Exists(directoryPath))
+                return;
+
+            // Restart auto save timer
+            //tmrAutoUpdate.Stop();
+            //tmrAutoUpdate.Start();
+
+            SelectedFolder = directoryPath;
+
+            imageInfoCache.Clear();
+
             List<string> imageFiles = new List<string>();
             foreach (string filter in filters)
             {
                 imageFiles.AddRange(Directory.GetFiles(directoryPath, filter));
             }
 
-            imageInfoCache.Clear();
-
             int imageIndex = 0;
             foreach (string imageFullPath in imageFiles)
             {
                 // Full path to the image
-                string imageFileName = Path.GetFileNameWithoutExtension(imageFullPath);
+                string imageFileName = Path.GetFileName(imageFullPath);
 
                 // New treeview node
                 TreeNode node = new TreeNode
@@ -99,6 +175,8 @@ namespace PictureSorter
                 imageIndex++;
             }
 
+            UpdateFromSave();
+
             if (imageInfoCache.Count > 0)
                 treeView1.SelectedNode = treeView1.Nodes[0];
 
@@ -127,6 +205,9 @@ namespace PictureSorter
             ToggleSelectedImage();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         private void ToggleSelectedImage()
         {
             selectedImageInfo.ToggleSelection();
@@ -138,6 +219,9 @@ namespace PictureSorter
             GC.Collect();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         public void UpdateIsSelectedBackground()
         {
             if (null == SelectedColorControl)
@@ -151,194 +235,28 @@ namespace PictureSorter
             }
 
             SelectedColorControl.BackColor = selectedImageInfo.IsSelected
-                ? colorSelected
-                : colorNotSelected;
+                ? ImageInfo.colorSelected
+                : ImageInfo.colorNotSelected;
         }
 
         /// <summary>
-        /// Contains information about an image
+        ///
         /// </summary>
-        private class ImageInfo
+        private void sauvegarderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            public string FullPath { get; set; }
-            public int Index { get; set; }
-            private bool _isSelected = true;
-            public bool IsSelected
-            {
-                get => _isSelected;
-                set
-                {
-                    _isSelected = value;
-                    Node.BackColor = value ? colorSelected : Color.Transparent;
-                }
-            }
-
-            public TreeNode Node { get; set; }
-
-            public Image ReadImage()
-            {
-                Image outputImage = Image.FromFile(FullPath);
-                outputImage = ImageTools.FixRotation(outputImage);
-                outputImage = ImageTools.applyBorderToImage(
-                    outputImage,
-                    IsSelected ? colorSelected : colorNotSelected,
-                    40
-                );
-                return outputImage;
-            }
-
-            public Image ReapplyBorder(Image image)
-            {
-                image = ImageTools.reapplyBorderToImage(
-                    image,
-                    IsSelected ? colorSelected : colorNotSelected,
-                    40
-                );
-                return image;
-            }
-
-            public Image GetThumbnail()
-            {
-                Image image = ReadImage();
-                Image thumb = image.GetThumbnailImage(64, 64, () => false, IntPtr.Zero);
-                return thumb;
-            }
-
-            public void ToggleSelection()
-            {
-                IsSelected = !IsSelected;
-            }
+            SaveToFile();
         }
 
-        private abstract class ImageTools
+        private void ouvrirToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            public static Image FixRotation(Image image)
-            {
-                foreach (var prop in image.PropertyItems)
-                {
-                    if (prop.Id == 0x0112)
-                    {
-                        int orientationValue = image.GetPropertyItem(prop.Id).Value[0];
-                        RotateFlipType rotateFlipType = getRotateFlipType(orientationValue);
-                        image.RotateFlip(rotateFlipType);
-                        break;
-                    }
-                }
-
-                return image;
-            }
-
-            //=== determine image rotation
-            private static RotateFlipType getRotateFlipType(int rotateValue)
-            {
-                RotateFlipType flipType = RotateFlipType.RotateNoneFlipNone;
-
-                switch (rotateValue)
-                {
-                    case 1:
-                        flipType = RotateFlipType.RotateNoneFlipNone;
-                        break;
-                    case 2:
-                        flipType = RotateFlipType.RotateNoneFlipX;
-                        break;
-                    case 3:
-                        flipType = RotateFlipType.Rotate180FlipNone;
-                        break;
-                    case 4:
-                        flipType = RotateFlipType.Rotate180FlipX;
-                        break;
-                    case 5:
-                        flipType = RotateFlipType.Rotate90FlipX;
-                        break;
-                    case 6:
-                        flipType = RotateFlipType.Rotate90FlipNone;
-                        break;
-                    case 7:
-                        flipType = RotateFlipType.Rotate270FlipX;
-                        break;
-                    case 8:
-                        flipType = RotateFlipType.Rotate270FlipNone;
-                        break;
-                    default:
-                        flipType = RotateFlipType.RotateNoneFlipNone;
-                        break;
-                }
-
-                return flipType;
-            }
-
-            //=== image border
-            public static Image reapplyBorderToImage(Image image, Color borderColor, int borderSize)
-            {
-                if (borderSize < 0)
-                    throw new ArgumentOutOfRangeException(
-                        "borderSize",
-                        "The border size must be greater or equal to 0"
-                    );
-
-                //create a new square image
-                Bitmap newImage = new Bitmap(image.Width, image.Height);
-
-                using (Graphics graphics = Graphics.FromImage(newImage))
-                {
-                    //fill the new square with a color for the border
-                    graphics.FillRectangle(
-                        new SolidBrush(borderColor),
-                        0,
-                        0,
-                        newImage.Width,
-                        newImage.Height
-                    );
-
-                    //put the original image on top of the new square
-                    Rectangle srcRect = new Rectangle(
-                        borderSize,
-                        borderSize,
-                        image.Width - 2 * borderSize,
-                        image.Height - 2 * borderSize
-                    );
-                    graphics.DrawImage(image, borderSize, borderSize, srcRect, GraphicsUnit.Pixel);
-                }
-
-                //return the image
-                return newImage;
-            }
-
-            //=== image border
-            public static Image applyBorderToImage(Image image, Color borderColor, int borderSize)
-            {
-                if (borderSize < 0)
-                    throw new ArgumentOutOfRangeException(
-                        "borderSize",
-                        "The border size must be greater or equal to 0"
-                    );
-
-                //create a new square image
-                Bitmap newImage = new Bitmap(
-                    image.Width + 2 * borderSize,
-                    image.Height + 2 * borderSize
-                );
-
-                using (Graphics graphics = Graphics.FromImage(newImage))
-                {
-                    //fill the new square with a color for the border
-                    graphics.FillRectangle(
-                        new SolidBrush(borderColor),
-                        0,
-                        0,
-                        newImage.Width,
-                        newImage.Height
-                    );
-
-                    //put the original image on top of the new square
-                    graphics.DrawImage(image, borderSize, borderSize, image.Width, image.Height);
-                }
-
-                //return the image
-                return newImage;
-            }
+            ChooseFolder();
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             e.SuppressKeyPress = true;
@@ -352,6 +270,13 @@ namespace PictureSorter
                     e.SuppressKeyPress = false;
                     break;
             }
+        }
+
+        #endregion
+
+        private void quitterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
         }
     }
 }
