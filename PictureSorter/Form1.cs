@@ -41,7 +41,23 @@ namespace PictureSorter
 
         private void Form1_Shown(object sender, EventArgs e)
         {
-            ChooseFolder();
+            ChooseFile();
+        }
+
+        private void ChooseFile()
+        {
+            var dialog = new CommonOpenFileDialog("Sélectionner une image")
+            {
+                IsFolderPicker = false
+            };
+            CommonFileDialogResult result = dialog.ShowDialog();
+
+            if (result == CommonFileDialogResult.Ok)
+            {
+                string folder = Path.GetDirectoryName(dialog.FileName);
+
+                LoadImages(folder);
+            }
         }
 
         private void ChooseFolder()
@@ -242,7 +258,7 @@ namespace PictureSorter
 
         private void ouvrirToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ChooseFolder();
+            ChooseFile();
         }
 
         /// <summary>
@@ -351,6 +367,11 @@ namespace PictureSorter
             }
 
             Process.Start(folderSavePath);
+        }
+
+        private void ouvrirDossierToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ChooseFolder();
         }
     }
 }

@@ -48,6 +48,7 @@
             this.v110ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
+            this.ouvrirDossierToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -122,6 +123,7 @@
             this.fichierToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ouvrirToolStripMenuItem,
             this.sauvegarderToolStripMenuItem,
+            this.ouvrirDossierToolStripMenuItem,
             this.toolStripSeparator2,
             this.exporterLesImaesToolStripMenuItem,
             this.toolStripSeparator1,
@@ -134,7 +136,7 @@
             // 
             this.ouvrirToolStripMenuItem.Name = "ouvrirToolStripMenuItem";
             this.ouvrirToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.ouvrirToolStripMenuItem.Text = "Ouvrir sauvegarde";
+            this.ouvrirToolStripMenuItem.Text = "Ouvrir";
             this.ouvrirToolStripMenuItem.Click += new System.EventHandler(this.ouvrirToolStripMenuItem_Click);
             // 
             // sauvegarderToolStripMenuItem
@@ -243,6 +245,13 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // ouvrirDossierToolStripMenuItem
+            // 
+            this.ouvrirDossierToolStripMenuItem.Name = "ouvrirDossierToolStripMenuItem";
+            this.ouvrirDossierToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.ouvrirDossierToolStripMenuItem.Text = "Ouvrir dossier";
+            this.ouvrirDossierToolStripMenuItem.Click += new System.EventHandler(this.ouvrirDossierToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -293,6 +302,7 @@
         private System.Windows.Forms.ToolStripMenuItem réinitialisertoutSélectionnerToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toutCocherToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toutDécocherToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ouvrirDossierToolStripMenuItem;
     }
 }
 
