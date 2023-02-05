@@ -25,8 +25,8 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>https://esseivan.github.io/PictureSelector_Simple/</InstallUrl>
-    <UpdateUrl>https://esseivan.github.io/PictureSelector_Simple/</UpdateUrl>
+    <InstallUrl>https://esseivan.github.io/PictureSorter/</InstallUrl>
+    <UpdateUrl>https://esseivan.github.io/PictureSorter/</UpdateUrl>
     <SupportUrl>http://esseivan.github.io/PictureSelector_Simple/</SupportUrl>
     <ProductName>PictureSorter</ProductName>
     <PublisherName>ESN</PublisherName>
