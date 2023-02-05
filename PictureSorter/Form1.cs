@@ -66,7 +66,6 @@ namespace PictureSorter
                     SelectedImageIndex = imageIndex,
                     Text = imageFileName,
                 };
-                node.Bounds.Inflate(0, 10);
 
                 // Save image info
                 ImageInfo imageInfo = new ImageInfo
