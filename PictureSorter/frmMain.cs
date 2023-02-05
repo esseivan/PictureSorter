@@ -6,6 +6,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 using Size = System.Drawing.Size;
 
@@ -53,6 +54,45 @@ namespace PictureSorter
         /// The currently selected folder
         /// </summary>
         public string SelectedFolder = string.Empty;
+
+        /// <summary>
+        /// Current version of the app
+        /// </summary>
+        public string VersionLabel
+        {
+            get
+            {
+                if (System.Deployment.Application.ApplicationDeployment.IsNetworkDeployed)
+                {
+                    Version ver = System
+                        .Deployment
+                        .Application
+                        .ApplicationDeployment
+                        .CurrentDeployment
+                        .CurrentVersion;
+                    return string.Format(
+                        "Product Name: {4}, Version: {0}.{1}.{2}.{3}",
+                        ver.Major,
+                        ver.Minor,
+                        ver.Build,
+                        ver.Revision,
+                        Assembly.GetEntryAssembly().GetName().Name
+                    );
+                }
+                else
+                {
+                    var ver = Assembly.GetExecutingAssembly().GetName().Version;
+                    return string.Format(
+                        "Product Name: {4}, Version: {0}.{1}.{2}.{3}",
+                        ver.Major,
+                        ver.Minor,
+                        ver.Build,
+                        ver.Revision,
+                        Assembly.GetEntryAssembly().GetName().Name
+                    );
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -431,6 +471,16 @@ namespace PictureSorter
                     e.SuppressKeyPress = false;
                     break;
             }
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(
+                $"{VersionLabel}\nMade by EsseivaN",
+                "About",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
         }
 
         #endregion

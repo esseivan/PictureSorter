@@ -47,7 +47,7 @@
             this.toutDécocherToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.voirLaideToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.v110ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -90,12 +90,12 @@
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.Controls.Add(this.treeView1);
-            this.splitContainer1.Panel1.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.splitContainer1.Panel1.Padding = new System.Windows.Forms.Padding(3);
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.pictureBox1);
-            this.splitContainer1.Panel2.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.splitContainer1.Panel2.Padding = new System.Windows.Forms.Padding(3);
             this.splitContainer1.Size = new System.Drawing.Size(1378, 618);
             this.splitContainer1.SplitterDistance = 266;
             this.splitContainer1.TabIndex = 0;
@@ -111,7 +111,6 @@
             this.aideToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(6, 2, 0, 2);
             this.menuStrip1.Size = new System.Drawing.Size(1378, 33);
             this.menuStrip1.TabIndex = 3;
             this.menuStrip1.Text = "menuStrip1";
@@ -210,7 +209,7 @@
             // 
             this.aideToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.voirLaideToolStripMenuItem,
-            this.v110ToolStripMenuItem});
+            this.aboutToolStripMenuItem});
             this.aideToolStripMenuItem.Name = "aideToolStripMenuItem";
             this.aideToolStripMenuItem.Size = new System.Drawing.Size(64, 29);
             this.aideToolStripMenuItem.Text = "Aide";
@@ -218,15 +217,16 @@
             // voirLaideToolStripMenuItem
             // 
             this.voirLaideToolStripMenuItem.Name = "voirLaideToolStripMenuItem";
-            this.voirLaideToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
+            this.voirLaideToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
             this.voirLaideToolStripMenuItem.Text = "Voir l\'aide";
             this.voirLaideToolStripMenuItem.Click += new System.EventHandler(this.voirLaideToolStripMenuItem_Click);
             // 
-            // v110ToolStripMenuItem
+            // aboutToolStripMenuItem
             // 
-            this.v110ToolStripMenuItem.Name = "v110ToolStripMenuItem";
-            this.v110ToolStripMenuItem.Size = new System.Drawing.Size(191, 34);
-            this.v110ToolStripMenuItem.Text = "v1.1.0";
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(270, 34);
+            this.aboutToolStripMenuItem.Text = "About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // panel1
             // 
@@ -285,7 +285,7 @@
         private System.Windows.Forms.ToolStripMenuItem fichierToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aideToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem voirLaideToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem v110ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.ToolStripMenuItem ouvrirToolStripMenuItem;
