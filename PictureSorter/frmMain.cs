@@ -13,19 +13,50 @@ namespace PictureSorter
 {
     public partial class frmMain : Form
     {
+        /// <summary>
+        /// List of images used for the thumbnails in the treeview
+        /// </summary>
         private readonly ImageList imageList;
+
+        /// <summary>
+        /// Keep track of the images informations in the selected directory
+        /// </summary>
         private readonly Dictionary<string, ImageInfo> imageInfoCache =
             new Dictionary<string, ImageInfo>();
-        ImageInfo selectedImageInfo = null;
-        public Control SelectedColorControl = null;
 
-        readonly string[] filters = new string[] { "*.png", "*.jpg", "*.jpeg", "*.bmp" };
+        /// <summary>
+        /// The currently selected image from the treeview
+        /// </summary>
+        private ImageInfo selectedImageInfo = null;
 
+        /// <summary>
+        /// The control that changes it's background color according to the selected status
+        /// </summary>
+        private Control selectedColorControl = null;
+
+        /// <summary>
+        /// The extensions of the image files available
+        /// </summary>
+        private readonly string[] filters = new string[] { "*.png", "*.jpg", "*.jpeg", "*.bmp" };
+
+        /// <summary>
+        /// Display thumbnails in the treeview when set to 'true'
+        /// </summary>
         private const bool previewImage = false;
 
+        /// <summary>
+        /// The name of the saved progress file
+        /// </summary>
         private const string saveFileName = "pictureSorter.pssave";
+
+        /// <summary>
+        /// The currently selected folder
+        /// </summary>
         public string SelectedFolder = string.Empty;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public frmMain()
         {
             InitializeComponent();
