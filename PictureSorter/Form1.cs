@@ -1,63 +1,150 @@
-﻿using System;
+﻿using ESNLib.Tools;
+using Microsoft.WindowsAPICodePack.Dialogs;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Forms;
+using MessageBox = System.Windows.MessageBox;
+using Size = System.Drawing.Size;
 
 namespace PictureSorter
 {
     public partial class Form1 : Form
     {
         private readonly ImageList imageList;
-        private readonly Dictionary<string, ImageInfo> imageCache =
+        private readonly Dictionary<string, ImageInfo> imageInfoCache =
             new Dictionary<string, ImageInfo>();
         ImageInfo selectedImageInfo = null;
+        public Control SelectedColorControl = null;
 
         readonly string[] filters = new string[] { "*.png", "*.jpg", "*.jpeg", "*.bmp" };
 
-        bool previewImage = false;
+        private const bool previewImage = false;
 
-        string filepath = @"C:\Users\nicol\Pictures\Aletsch 2022 2";
-
-        //string filepath = @"C:\Users\nicol\Pictures\Screenshots";
+        private const string saveFileName = "pictureSelector.pssave";
+        public string SelectedFolder = string.Empty;
 
         public Form1()
         {
             InitializeComponent();
+
+            SelectedColorControl = panel1;
 
             imageList = new ImageList { ImageSize = new Size(64, 64) };
 
             treeView1.ImageList = previewImage ? imageList : null;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void Form1_Shown(object sender, EventArgs e)
         {
-            LoadImages();
+            ChooseFile();
         }
 
-        private void LoadImages()
+        private void ChooseFile()
         {
+            var dialog = new CommonOpenFileDialog("Sélectionner une image")
+            {
+                IsFolderPicker = false
+            };
+            CommonFileDialogResult result = dialog.ShowDialog();
+
+            if (result == CommonFileDialogResult.Ok)
+            {
+                string folder = Path.GetDirectoryName(dialog.FileName);
+
+                LoadImages(folder);
+            }
+        }
+
+        private void ChooseFolder()
+        {
+            var dialog = new CommonOpenFileDialog("Sélectionner le dossier contenant les images")
+            {
+                IsFolderPicker = true
+            };
+            CommonFileDialogResult result = dialog.ShowDialog();
+
+            if (result == CommonFileDialogResult.Ok)
+            {
+                LoadImages(dialog.FileName);
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        private void SaveToFile(bool backup = false)
+        {
+            if (!Directory.Exists(SelectedFolder))
+                return;
+
+            if (imageInfoCache.Count == 0)
+                return;
+
+            string savePath = Path.Combine(SelectedFolder, saveFileName);
+            if (File.Exists(savePath))
+                File.SetAttributes(savePath, FileAttributes.Normal);
+
+            SettingsManager.SaveTo(savePath, imageInfoCache, backup, true);
+
+            File.SetAttributes(savePath, FileAttributes.Hidden);
+
+            Console.WriteLine("Saved !");
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        private void UpdateFromSave()
+        {
+            string savePath = Path.Combine(SelectedFolder, saveFileName);
+
+            if (!File.Exists(savePath))
+                return;
+
+            if (!SettingsManager.LoadFrom(savePath, out Dictionary<string, ImageInfo> loadedData))
+                return;
+
+            // Apply only the IsSelected property
+            foreach (var dataItem in loadedData)
+            {
+                if (imageInfoCache.ContainsKey(dataItem.Key))
+                {
+                    imageInfoCache[dataItem.Key].IsSelected = dataItem.Value.IsSelected;
+                }
+            }
+        }
+
+        #region Image management
+
+        /// <summary>
+        /// Load images in the specified directory
+        /// </summary>
+        /// <param name="directoryPath"></param>
+        private void LoadImages(string directoryPath)
+        {
+            if (!Directory.Exists(directoryPath))
+                return;
+
+            SelectedFolder = directoryPath;
+
+            imageInfoCache.Clear();
+
             List<string> imageFiles = new List<string>();
             foreach (string filter in filters)
             {
-                imageFiles.AddRange(Directory.GetFiles(filepath, filter));
+                imageFiles.AddRange(Directory.GetFiles(directoryPath, filter));
             }
-
-            imageCache.Clear();
 
             int imageIndex = 0;
             foreach (string imageFullPath in imageFiles)
             {
                 // Full path to the image
-                string imageFileName = Path.GetFileNameWithoutExtension(imageFullPath);
+                string imageFileName = Path.GetFileName(imageFullPath);
 
                 // New treeview node
                 TreeNode node = new TreeNode
@@ -76,7 +163,7 @@ namespace PictureSorter
                     IsSelected = true
                 };
                 // Cache the image info
-                imageCache[imageFileName] = imageInfo;
+                imageInfoCache[imageFileName] = imageInfo;
 
                 // Add the image to the imagelist for the treeview
                 if (previewImage)
@@ -88,6 +175,14 @@ namespace PictureSorter
                 treeView1.Nodes.Add(node);
                 imageIndex++;
             }
+
+            UpdateFromSave(); // Update selection from save
+            SaveToFile(); // Save. Maybe more images, maybe no save yet
+
+            if (imageInfoCache.Count > 0)
+                treeView1.SelectedNode = treeView1.Nodes[0];
+
+            treeView1.Focus();
         }
 
         /// <summary>
@@ -96,9 +191,12 @@ namespace PictureSorter
         private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
         {
             string selectedFilePath = e.Node.FullPath;
-            selectedImageInfo = imageCache[selectedFilePath];
+            selectedImageInfo = imageInfoCache[selectedFilePath];
             // Set the picturebox image
             pictureBox1.Image = selectedImageInfo.ReadImage();
+            GC.Collect();
+
+            UpdateIsSelectedBackground();
         }
 
         /// <summary>
@@ -106,71 +204,173 @@ namespace PictureSorter
         /// </summary>
         private void button1_Click(object sender, EventArgs e)
         {
-            selectedImageInfo.ToggleSelection();
+            ToggleSelectedImage();
+            treeView1.Focus();
         }
 
         /// <summary>
-        /// Contains information about an image
+        /// Change the selection state of the selected image
         /// </summary>
-        private class ImageInfo
+        private void ToggleSelectedImage()
         {
-            private static int cacheSize = 10;
-            private static Queue<ImageInfo> imagesCached = new Queue<ImageInfo>(cacheSize);
+            if (null == selectedImageInfo)
+                return;
 
-            public Image CachedImage { get; set; }
-            public string FullPath { get; set; }
-            public int Index { get; set; }
-            private bool _isSelected = true;
-            public bool IsSelected
+            selectedImageInfo.ToggleSelection();
+
+            UpdateIsSelectedBackground();
+
+            // Update picturebox image (border)
+            pictureBox1.Image = selectedImageInfo.ReapplyBorder(pictureBox1.Image);
+            GC.Collect();
+
+            SaveToFile();
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        public void UpdateIsSelectedBackground()
+        {
+            if (null == SelectedColorControl)
             {
-                get => _isSelected;
-                set
-                {
-                    _isSelected = value;
-                    Node.BackColor = value ? Color.LightGreen : Color.Transparent;
-                }
+                return;
             }
 
-            public TreeNode Node { get; set; }
-
-            public Image ReadImage()
+            if (null == selectedImageInfo)
             {
-                if (null == CachedImage)
-                {
-                    CachedImage = Image.FromFile(FullPath);
-                    AddCache();
-                }
-
-                return CachedImage;
+                return;
             }
 
-            public Image GetThumbnail()
+            SelectedColorControl.BackColor = selectedImageInfo.IsSelected
+                ? ImageInfo.colorSelected
+                : ImageInfo.colorNotSelected;
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        private void sauvegarderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveToFile();
+        }
+
+        private void ouvrirToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ChooseFile();
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            e.SuppressKeyPress = true;
+            switch (e.KeyCode)
             {
-                Image image = ReadImage();
-                Image thumb = image.GetThumbnailImage(64, 64, () => false, IntPtr.Zero);
-                return thumb;
+                case Keys.Space:
+                case Keys.Enter:
+                    ToggleSelectedImage();
+                    break;
+                default:
+                    e.SuppressKeyPress = false;
+                    break;
+            }
+        }
+
+        #endregion
+
+        private void quitterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void voirLaideToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string helpStr =
+                "1. Aller sous Fichier -> Ouvrir pour choisir un DOSSIER contenant les images à sélectionner\n\n"
+                + "2. Sélectionner les images en utilisant les flèches Haut et Bas et la barre Espace\n\n"
+                + "3. Aller sous Fichier -> Exporter pour choisir un DOSSIER où copier les images sélectionnées";
+            System.Windows.MessageBox.Show(
+                helpStr,
+                "Aide",
+                MessageBoxButton.OK,
+                MessageBoxImage.Question
+            );
+        }
+
+        private void toutCocherToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Backup current save
+            SaveToFile(true);
+
+            foreach (ImageInfo imageInfo in imageInfoCache.Values)
+            {
+                imageInfo.IsSelected = true;
+            }
+        }
+
+        private void toutDécocherToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Backup current save
+            SaveToFile(true);
+
+            foreach (ImageInfo imageInfo in imageInfoCache.Values)
+            {
+                imageInfo.IsSelected = false;
+            }
+        }
+
+        private void exporterLesImaesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ExportSelectedImages();
+        }
+
+        private void ExportSelectedImages()
+        {
+            var selectedImages = imageInfoCache.Where((x) => x.Value.IsSelected);
+
+            if (0 == selectedImages.Count())
+            {
+                MessageBox.Show(
+                    "Pas d'image sélectionnée trouvée",
+                    "Erreur",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+                return;
             }
 
-            public void ToggleSelection()
+            string folderSavePath = Path.Combine(
+                Path.GetDirectoryName(SelectedFolder),
+                Path.GetFileName(SelectedFolder) + " tri "
+            );
+
+            int counter = 1;
+            while (Directory.Exists(folderSavePath + counter))
             {
-                IsSelected = !IsSelected;
+                counter++;
+            }
+            folderSavePath += counter;
+            Directory.CreateDirectory(folderSavePath);
+
+            Console.WriteLine($"Saving to '{folderSavePath}'");
+
+            foreach (var file in selectedImages)
+            {
+                string srcPath = Path.Combine(SelectedFolder, file.Key);
+                string destPath = Path.Combine(folderSavePath, file.Key);
+                File.Copy(srcPath, destPath, false);
             }
 
-            public void AddCache()
-            {
-                // Decache image
-                if (imagesCached.Count >= cacheSize)
-                {
-                    ImageInfo imageInfo = imagesCached.Dequeue();
-                    imageInfo.CachedImage = null;
-                    GC.Collect();
-                    Console.WriteLine("Dequeued. Count is " + imagesCached.Count);
-                }
+            Process.Start(folderSavePath);
+        }
 
-                // cache image
-                imagesCached.Enqueue(this);
-                Console.WriteLine("Enqueued. Count is " + imagesCached.Count);
-            }
+        private void ouvrirDossierToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ChooseFolder();
         }
     }
 }
