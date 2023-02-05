@@ -37,11 +37,38 @@ namespace PictureSorter
             treeView1.ImageList = previewImage ? imageList : null;
         }
 
+        /// <summary>
+        /// Called when app is shown
+        /// </summary>
         private void Form1_Shown(object sender, EventArgs e)
         {
             ChooseFile();
         }
 
+        #region Selection and File management
+
+        /// <summary>
+        /// Change the selection state of the selected image
+        /// </summary>
+        private void ToggleSelectedImage()
+        {
+            if (null == selectedImageInfo)
+                return;
+
+            selectedImageInfo.ToggleSelection();
+
+            UpdateIsSelectedBackground();
+
+            // Update picturebox image (border)
+            pictureBox1.Image = selectedImageInfo.ReapplyBorder(pictureBox1.Image);
+            GC.Collect();
+
+            SaveToFile();
+        }
+
+        /// <summary>
+        /// Choose a file and select the parent folder
+        /// </summary>
         private void ChooseFile()
         {
             var dialog = new CommonOpenFileDialog("Sélectionner une image")
@@ -58,6 +85,9 @@ namespace PictureSorter
             }
         }
 
+        /// <summary>
+        /// Choose a folder
+        /// </summary>
         private void ChooseFolder()
         {
             var dialog = new CommonOpenFileDialog("Sélectionner le dossier contenant les images")
@@ -73,7 +103,7 @@ namespace PictureSorter
         }
 
         /// <summary>
-        ///
+        /// Save the progress into a predetermined save file in the folder
         /// </summary>
         private void SaveToFile(bool backup = false)
         {
@@ -95,7 +125,7 @@ namespace PictureSorter
         }
 
         /// <summary>
-        ///
+        /// Sync the selection with the save in the folder
         /// </summary>
         private void UpdateFromSave()
         {
@@ -117,10 +147,12 @@ namespace PictureSorter
             }
         }
 
+        #endregion
+
         #region Image management
 
         /// <summary>
-        /// Load images in the specified directory
+        /// Load images from the specified directory
         /// </summary>
         /// <param name="directoryPath"></param>
         private void LoadImages(string directoryPath)
@@ -184,49 +216,7 @@ namespace PictureSorter
         }
 
         /// <summary>
-        /// Image selected. Set into the picturebox and save into static variable
-        /// </summary>
-        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
-        {
-            string selectedFilePath = e.Node.FullPath;
-            selectedImageInfo = imageInfoCache[selectedFilePath];
-            // Set the picturebox image
-            pictureBox1.Image = selectedImageInfo.ReadImage();
-            GC.Collect();
-
-            UpdateIsSelectedBackground();
-        }
-
-        /// <summary>
-        /// Selection button clicked
-        /// </summary>
-        private void button1_Click(object sender, EventArgs e)
-        {
-            ToggleSelectedImage();
-            treeView1.Focus();
-        }
-
-        /// <summary>
-        /// Change the selection state of the selected image
-        /// </summary>
-        private void ToggleSelectedImage()
-        {
-            if (null == selectedImageInfo)
-                return;
-
-            selectedImageInfo.ToggleSelection();
-
-            UpdateIsSelectedBackground();
-
-            // Update picturebox image (border)
-            pictureBox1.Image = selectedImageInfo.ReapplyBorder(pictureBox1.Image);
-            GC.Collect();
-
-            SaveToFile();
-        }
-
-        /// <summary>
-        ///
+        /// Update the backround color to inform if the current image is selected or not
         /// </summary>
         public void UpdateIsSelectedBackground()
         {
@@ -246,81 +236,8 @@ namespace PictureSorter
         }
 
         /// <summary>
-        ///
+        /// Export the selected images into a predefined folder
         /// </summary>
-        private void sauvegarderToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SaveToFile();
-        }
-
-        private void ouvrirToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ChooseFile();
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
-        {
-            e.SuppressKeyPress = true;
-            switch (e.KeyCode)
-            {
-                case Keys.Space:
-                case Keys.Enter:
-                    ToggleSelectedImage();
-                    break;
-                default:
-                    e.SuppressKeyPress = false;
-                    break;
-            }
-        }
-
-        #endregion
-
-        private void quitterToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Close();
-        }
-
-        private void voirLaideToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            string helpStr =
-                "1. Aller sous Fichier -> Ouvrir pour choisir un DOSSIER contenant les images à sélectionner\n\n"
-                + "2. Sélectionner les images en utilisant les flèches Haut et Bas et la barre Espace\n\n"
-                + "3. Aller sous Fichier -> Exporter pour choisir un DOSSIER où copier les images sélectionnées";
-            MessageBox.Show(helpStr, "Aide", MessageBoxButtons.OK, MessageBoxIcon.Question);
-        }
-
-        private void toutCocherToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // Backup current save
-            SaveToFile(true);
-
-            foreach (ImageInfo imageInfo in imageInfoCache.Values)
-            {
-                imageInfo.IsSelected = true;
-            }
-        }
-
-        private void toutDécocherToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            // Backup current save
-            SaveToFile(true);
-
-            foreach (ImageInfo imageInfo in imageInfoCache.Values)
-            {
-                imageInfo.IsSelected = false;
-            }
-        }
-
-        private void exporterLesImaesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            ExportSelectedImages();
-        }
-
         private void ExportSelectedImages()
         {
             var selectedImages = imageInfoCache.Where((x) => x.Value.IsSelected);
@@ -361,9 +278,130 @@ namespace PictureSorter
             Process.Start(folderSavePath);
         }
 
+        #endregion
+
+        #region Events
+
+        /// <summary>
+        /// Quitter
+        /// </summary>
+        private void quitterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        /// <summary>
+        /// Help tooltip
+        /// </summary>
+        private void voirLaideToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string helpStr =
+                "1. Aller sous Fichier -> Ouvrir pour choisir une image dans le dossier contenant les images à sélectionner\n\n"
+                + "2. Trier les images en utilisant les flèches Haut et Bas et la barre Espace\n\n"
+                + "3. Aller sous Fichier -> 'Exporter les images'. Un nouveau dossier est crée";
+            MessageBox.Show(helpStr, "Aide", MessageBoxButtons.OK, MessageBoxIcon.Question);
+        }
+
+        /// <summary>
+        /// Select all
+        /// </summary>
+        private void toutCocherToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Backup current save
+            SaveToFile(true);
+
+            foreach (ImageInfo imageInfo in imageInfoCache.Values)
+            {
+                imageInfo.IsSelected = true;
+            }
+        }
+
+        /// <summary>
+        /// Unselect all
+        /// </summary>
+        private void toutDécocherToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Backup current save
+            SaveToFile(true);
+
+            foreach (ImageInfo imageInfo in imageInfoCache.Values)
+            {
+                imageInfo.IsSelected = false;
+            }
+        }
+
+        /// <summary>
+        /// Export selection
+        /// </summary>
+        private void exporterLesImaesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ExportSelectedImages();
+        }
+
         private void ouvrirDossierToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ChooseFolder();
         }
+
+        /// <summary>
+        /// Image selected. Set into the picturebox and save into static variable
+        /// </summary>
+        private void treeView1_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            string selectedFilePath = e.Node.FullPath;
+            selectedImageInfo = imageInfoCache[selectedFilePath];
+            // Set the picturebox image
+            pictureBox1.Image = selectedImageInfo.ReadImage();
+            GC.Collect();
+
+            UpdateIsSelectedBackground();
+        }
+
+        /// <summary>
+        /// Selection button clicked
+        /// </summary>
+        private void button1_Click(object sender, EventArgs e)
+        {
+            ToggleSelectedImage();
+            treeView1.Focus();
+        }
+
+        /// <summary>
+        /// Save progres. Automatically made so not really usefull
+        /// </summary>
+        private void sauvegarderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveToFile();
+        }
+
+        /// <summary>
+        /// Open a file
+        /// </summary>
+        private void ouvrirToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ChooseFile();
+        }
+
+        /// <summary>
+        /// When a key is pressed. Global listener
+        /// </summary>
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            // The button is made so that it cannot be focused,
+            // so no worries to double toggle the selection
+            e.SuppressKeyPress = true;
+            switch (e.KeyCode)
+            {
+                case Keys.Space:
+                case Keys.Enter:
+                    ToggleSelectedImage();
+                    break;
+                default:
+                    e.SuppressKeyPress = false;
+                    break;
+            }
+        }
+
+        #endregion
     }
 }
