@@ -6,9 +6,7 @@ using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Windows;
 using System.Windows.Forms;
-using MessageBox = System.Windows.MessageBox;
 using Size = System.Drawing.Size;
 
 namespace PictureSorter
@@ -25,7 +23,7 @@ namespace PictureSorter
 
         private const bool previewImage = false;
 
-        private const string saveFileName = "pictureSelector.pssave";
+        private const string saveFileName = "pictureSorter.pssave";
         public string SelectedFolder = string.Empty;
 
         public Form1()
@@ -293,12 +291,7 @@ namespace PictureSorter
                 "1. Aller sous Fichier -> Ouvrir pour choisir un DOSSIER contenant les images à sélectionner\n\n"
                 + "2. Sélectionner les images en utilisant les flèches Haut et Bas et la barre Espace\n\n"
                 + "3. Aller sous Fichier -> Exporter pour choisir un DOSSIER où copier les images sélectionnées";
-            System.Windows.MessageBox.Show(
-                helpStr,
-                "Aide",
-                MessageBoxButton.OK,
-                MessageBoxImage.Question
-            );
+            MessageBox.Show(helpStr, "Aide", MessageBoxButtons.OK, MessageBoxIcon.Question);
         }
 
         private void toutCocherToolStripMenuItem_Click(object sender, EventArgs e)
@@ -337,8 +330,8 @@ namespace PictureSorter
                 MessageBox.Show(
                     "Pas d'image sélectionnée trouvée",
                     "Erreur",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
                 );
                 return;
             }
