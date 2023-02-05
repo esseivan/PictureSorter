@@ -61,7 +61,7 @@ namespace PictureSorter
         {
             InitializeComponent();
 
-            SelectedColorControl = panel1;
+            selectedColorControl = panel1;
 
             imageList = new ImageList { ImageSize = new Size(64, 64) };
 
@@ -251,7 +251,7 @@ namespace PictureSorter
         /// </summary>
         public void UpdateIsSelectedBackground()
         {
-            if (null == SelectedColorControl)
+            if (null == selectedColorControl)
             {
                 return;
             }
@@ -261,7 +261,7 @@ namespace PictureSorter
                 return;
             }
 
-            SelectedColorControl.BackColor = selectedImageInfo.IsSelected
+            selectedColorControl.BackColor = selectedImageInfo.IsSelected
                 ? ImageInfo.colorSelected
                 : ImageInfo.colorNotSelected;
         }
