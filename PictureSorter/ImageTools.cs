@@ -24,8 +24,7 @@ namespace PictureSorter
         //=== determine image rotation
         private static RotateFlipType getRotateFlipType(int rotateValue)
         {
-            RotateFlipType flipType = RotateFlipType.RotateNoneFlipNone;
-
+            RotateFlipType flipType;
             switch (rotateValue)
             {
                 case 1:
@@ -61,13 +60,21 @@ namespace PictureSorter
         }
 
         //=== image border
-        public static Image reapplyBorderToImage(Image image, Color borderColor, int borderSize)
+        public static Image reapplyBorderToImage(
+            Image image,
+            Color borderColor,
+            float borderSizePercent
+        )
         {
-            if (borderSize < 0)
+            if (borderSizePercent < 0)
                 throw new ArgumentOutOfRangeException(
                     "borderSize",
                     "The border size must be greater or equal to 0"
                 );
+
+            int minDimension = Math.Min(image.Width, image.Height);
+            float minRealDimension = minDimension / (1 + borderSizePercent);
+            int borderSizePixels = (int)Math.Round(borderSizePercent * minRealDimension);
 
             //create a new square image
             Bitmap newImage = new Bitmap(image.Width, image.Height);
@@ -85,12 +92,18 @@ namespace PictureSorter
 
                 //put the original image on top of the new square
                 Rectangle srcRect = new Rectangle(
-                    borderSize,
-                    borderSize,
-                    image.Width - 2 * borderSize,
-                    image.Height - 2 * borderSize
+                    borderSizePixels,
+                    borderSizePixels,
+                    image.Width - 2 * borderSizePixels,
+                    image.Height - 2 * borderSizePixels
                 );
-                graphics.DrawImage(image, borderSize, borderSize, srcRect, GraphicsUnit.Pixel);
+                graphics.DrawImage(
+                    image,
+                    borderSizePixels,
+                    borderSizePixels,
+                    srcRect,
+                    GraphicsUnit.Pixel
+                );
             }
 
             //return the image
@@ -98,18 +111,25 @@ namespace PictureSorter
         }
 
         //=== image border
-        public static Image applyBorderToImage(Image image, Color borderColor, int borderSize)
+        public static Image applyBorderToImage(
+            Image image,
+            Color borderColor,
+            float borderSizePercent
+        )
         {
-            if (borderSize < 0)
+            if (borderSizePercent < 0)
                 throw new ArgumentOutOfRangeException(
                     "borderSize",
                     "The border size must be greater or equal to 0"
                 );
 
+            int minDimension = Math.Min(image.Width, image.Height);
+            int borderSizePixels = (int)Math.Round(borderSizePercent * minDimension);
+
             //create a new square image
             Bitmap newImage = new Bitmap(
-                image.Width + 2 * borderSize,
-                image.Height + 2 * borderSize
+                image.Width + 2 * borderSizePixels,
+                image.Height + 2 * borderSizePixels
             );
 
             using (Graphics graphics = Graphics.FromImage(newImage))
@@ -124,7 +144,13 @@ namespace PictureSorter
                 );
 
                 //put the original image on top of the new square
-                graphics.DrawImage(image, borderSize, borderSize, image.Width, image.Height);
+                graphics.DrawImage(
+                    image,
+                    borderSizePixels,
+                    borderSizePixels,
+                    image.Width,
+                    image.Height
+                );
             }
 
             //return the image

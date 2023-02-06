@@ -40,7 +40,7 @@ namespace PictureSorter
             outputImage = ImageTools.applyBorderToImage(
                 outputImage,
                 IsSelected ? colorSelected : colorNotSelected,
-                40
+                0.01f // 1 %
             );
             return outputImage;
         }
@@ -50,7 +50,7 @@ namespace PictureSorter
             image = ImageTools.reapplyBorderToImage(
                 image,
                 IsSelected ? colorSelected : colorNotSelected,
-                40
+                0.01f // 1 %
             );
             return image;
         }
