@@ -10,8 +10,13 @@ namespace PictureSorter
     /// </summary>
     public class ImageInfo
     {
+        private static CacheManager cacheManager = new CacheManager();
+
         public static readonly Color colorSelected = Color.LightGreen,
             colorNotSelected = Color.Salmon;
+
+        [JsonIgnore]
+        public Image CachedImage { get; set; }
 
         [JsonIgnore]
         public string FullPath { get; set; }
@@ -35,6 +40,9 @@ namespace PictureSorter
 
         public Image ReadImage()
         {
+            if (null != CachedImage)
+                return CachedImage;
+
             Image outputImage = Image.FromFile(FullPath);
             outputImage = ImageTools.FixRotation(outputImage);
             outputImage = ImageTools.applyBorderToImage(
@@ -65,6 +73,21 @@ namespace PictureSorter
         public void ToggleSelection()
         {
             IsSelected = !IsSelected;
+        }
+
+        public void Cache()
+        {
+            if (null == CachedImage)
+            {
+                Console.WriteLine($"'{FullPath}' cached");
+                CachedImage = ReadImage();
+            }
+        }
+
+        public void Decache()
+        {
+            Console.WriteLine($"'{FullPath}' decached");
+            CachedImage = null;
         }
     }
 }

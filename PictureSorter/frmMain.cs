@@ -233,7 +233,9 @@ namespace PictureSorter
 
             SelectedFolder = directoryPath;
 
+            cacheManager.Clear();
             imageInfoCache.Clear();
+            treeView1.Nodes.Clear();
 
             List<string> imageFiles = new List<string>();
             foreach (string filter in filters)
@@ -421,11 +423,43 @@ namespace PictureSorter
         {
             string selectedFilePath = e.Node.FullPath;
             selectedImageInfo = imageInfoCache[selectedFilePath];
+
             // Set the picturebox image
             pictureBox1.Image = selectedImageInfo.ReadImage();
+
+            Application.DoEvents(); // Apply the picture
+
+            PrepareCache(
+                imageInfoCache.Keys.ToList().IndexOf(selectedFilePath),
+                imageInfoCache.Count
+            );
+
             GC.Collect();
 
             UpdateIsSelectedBackground();
+        }
+
+        private CacheManager cacheManager = new CacheManager();
+
+        private void PrepareCache(int index, int maxIndex)
+        {
+            if (0 == CacheManager.CACHE_SIZE) // no caching
+                return;
+
+            List<ImageInfo> toCache = new List<ImageInfo>();
+            if ((index > 0) && CacheManager.CACHE_SIZE >= 3) // only if 3 or more
+            {
+                toCache.Add(imageInfoCache.ElementAt(index - 1).Value);
+            }
+
+            toCache.Add(imageInfoCache.ElementAt(index).Value);
+
+            if (((index + 1) < maxIndex) && CacheManager.CACHE_SIZE >= 2) // only if 2 or more
+            {
+                toCache.Add(imageInfoCache.ElementAt(index + 1).Value);
+            }
+
+            cacheManager.Add(toCache);
         }
 
         /// <summary>
