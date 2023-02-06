@@ -72,10 +72,9 @@ namespace PictureSorter
                     "The border size must be greater or equal to 0"
                 );
 
-            int minDimension = Math.Min(image.Width, image.Height);
-            float minRealDimension = minDimension / (1 + borderSizePercent);
-            int borderSizePixels = (int)Math.Round(borderSizePercent * minRealDimension);
-
+            int maxDimension = Math.Max(image.Width, image.Height);
+            float maxRealDimension = maxDimension / (1 + borderSizePercent);
+            int borderSizePixels = (int)Math.Round(borderSizePercent * maxRealDimension);
             //create a new square image
             Bitmap newImage = new Bitmap(image.Width, image.Height);
 
@@ -123,8 +122,8 @@ namespace PictureSorter
                     "The border size must be greater or equal to 0"
                 );
 
-            int minDimension = Math.Min(image.Width, image.Height);
-            int borderSizePixels = (int)Math.Round(borderSizePercent * minDimension);
+            int maxDimension = Math.Max(image.Width, image.Height);
+            int borderSizePixels = (int)Math.Round(borderSizePercent * maxDimension);
 
             //create a new square image
             Bitmap newImage = new Bitmap(
