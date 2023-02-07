@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Size = System.Drawing.Size;
 
@@ -31,9 +32,14 @@ namespace PictureSorter
         private ImageInfo selectedImageInfo = null;
 
         /// <summary>
+        /// Manage the caching of images
+        /// </summary>
+        private readonly CacheManager cacheManager = new CacheManager();
+
+        /// <summary>
         /// The control that changes it's background color according to the selected status
         /// </summary>
-        private Control selectedColorControl = null;
+        private readonly Control selectedColorControl = null;
 
         /// <summary>
         /// The extensions of the image files available
@@ -424,22 +430,20 @@ namespace PictureSorter
             string selectedFilePath = e.Node.FullPath;
             selectedImageInfo = imageInfoCache[selectedFilePath];
 
-            // Set the picturebox image
-            pictureBox1.Image = selectedImageInfo.ReadImage();
-
-            Application.DoEvents(); // Apply the picture
-
-            PrepareCache(
-                imageInfoCache.Keys.ToList().IndexOf(selectedFilePath),
-                imageInfoCache.Count
-            );
-
-            GC.Collect();
+            // Set the picturebox image. Generally cached
+            pictureBox1.Image = selectedImageInfo.GetImageAndCache();
 
             UpdateIsSelectedBackground();
+
+            CacheAsync();
         }
 
-        private CacheManager cacheManager = new CacheManager();
+        private async void CacheAsync()
+        {
+            await Task.Delay(10);
+
+            PrepareCache(selectedImageInfo.Index, imageInfoCache.Count);
+        }
 
         private void PrepareCache(int index, int maxIndex)
         {

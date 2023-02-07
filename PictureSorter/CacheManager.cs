@@ -42,6 +42,8 @@ namespace PictureSorter
                 }
             );
 
+            GC.Collect();
+
             // Fill the cache
             imagesCached.Clear();
             imagesCached.AddRange(imageInfos);

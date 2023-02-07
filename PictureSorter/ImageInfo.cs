@@ -38,11 +38,20 @@ namespace PictureSorter
         [JsonIgnore]
         public TreeNode Node { get; set; }
 
-        public Image ReadImage()
+        public Image GetImageAndCache()
         {
             if (null != CachedImage)
                 return CachedImage;
 
+            CachedImage = ReadImage();
+            return CachedImage;
+        }
+
+        /// <summary>
+        /// Read the image from the file
+        /// </summary>
+        private Image ReadImage()
+        {
             Image outputImage = Image.FromFile(FullPath);
             outputImage = ImageTools.FixRotation(outputImage);
             outputImage = ImageTools.applyBorderToImage(
@@ -50,6 +59,7 @@ namespace PictureSorter
                 IsSelected ? colorSelected : colorNotSelected,
                 0.01f // 1 %
             );
+            GC.Collect();
             return outputImage;
         }
 
@@ -77,15 +87,22 @@ namespace PictureSorter
 
         public void Cache()
         {
-            if (null == CachedImage)
-            {
-                Console.WriteLine($"'{FullPath}' cached");
-                CachedImage = ReadImage();
-            }
+            if (null != CachedImage)
+                return;
+
+            Console.WriteLine($"'{FullPath}' cached");
+            CachedImage = ReadImage();
         }
 
         public void Decache()
         {
+            if (null == CachedImage)
+            {
+                throw new InvalidOperationException(
+                    "Image was not cached. This is a cause of a major error in the programm !"
+                );
+            }
+
             Console.WriteLine($"'{FullPath}' decached");
             CachedImage = null;
         }
