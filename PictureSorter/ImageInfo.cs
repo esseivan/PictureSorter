@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Text.Json.Serialization;
 using System.Windows.Forms;
 
@@ -10,8 +11,6 @@ namespace PictureSorter
     /// </summary>
     public class ImageInfo
     {
-        private static CacheManager cacheManager = new CacheManager();
-
         public static readonly Color colorSelected = Color.LightGreen,
             colorNotSelected = Color.Salmon;
 
@@ -71,13 +70,6 @@ namespace PictureSorter
                 0.01f // 1 %
             );
             return image;
-        }
-
-        public Image GetThumbnail()
-        {
-            Image image = ReadImage();
-            Image thumb = image.GetThumbnailImage(64, 64, () => false, IntPtr.Zero);
-            return thumb;
         }
 
         public void ToggleSelection()

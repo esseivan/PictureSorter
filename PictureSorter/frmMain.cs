@@ -16,11 +16,6 @@ namespace PictureSorter
     public partial class frmMain : Form
     {
         /// <summary>
-        /// List of images used for the thumbnails in the treeview
-        /// </summary>
-        private readonly ImageList imageList;
-
-        /// <summary>
         /// Keep track of the images informations in the selected directory
         /// </summary>
         private readonly Dictionary<string, ImageInfo> imageInfoCache =
@@ -45,11 +40,6 @@ namespace PictureSorter
         /// The extensions of the image files available
         /// </summary>
         private readonly string[] filters = new string[] { "*.png", "*.jpg", "*.jpeg", "*.bmp" };
-
-        /// <summary>
-        /// Display thumbnails in the treeview when set to 'true'
-        /// </summary>
-        private const bool previewImage = false;
 
         /// <summary>
         /// The name of the saved progress file
@@ -108,10 +98,6 @@ namespace PictureSorter
             InitializeComponent();
 
             selectedColorControl = panel1;
-
-            imageList = new ImageList { ImageSize = new Size(64, 64) };
-
-            treeView1.ImageList = previewImage ? imageList : null;
         }
 
         /// <summary>
@@ -274,12 +260,6 @@ namespace PictureSorter
                 // Cache the image info
                 imageInfoCache[imageFileName] = imageInfo;
 
-                // Add the image to the imagelist for the treeview
-                if (previewImage)
-                {
-                    imageList.Images.Add(imageInfo.GetThumbnail());
-                    GC.Collect(); // Image cannot be disposed, so the GC will collect it
-                }
                 // Add the treeview node
                 treeView1.Nodes.Add(node);
                 imageIndex++;
