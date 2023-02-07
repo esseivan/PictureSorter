@@ -43,7 +43,7 @@ namespace PictureSorter
             if (null != CachedImage)
                 return CachedImage;
 
-            CachedImage = ReadImage();
+            Cache();
             return CachedImage;
         }
 

@@ -359,6 +359,45 @@ namespace PictureSorter
 
         #endregion
 
+        #region Cache management
+
+        /// <summary>
+        /// Cache images after 10ms to be sure the UI is updated
+        /// </summary>
+        private async void CacheAsync()
+        {
+            await Task.Delay(10);
+
+            PrepareCache(selectedImageInfo.Index, imageInfoCache.Count);
+        }
+
+        /// <summary>
+        /// Prepare for caching
+        /// </summary>
+        /// <param name="index">The currently seleted index</param>
+        /// <param name="maxIndex">Number of images in the list</param>
+        private void PrepareCache(int index, int maxIndex)
+        {
+            if (0 == CacheManager.CACHE_SIZE) // no caching
+                return;
+
+            List<ImageInfo> toCache = new List<ImageInfo>();
+            if ((index > 0) && CacheManager.CACHE_SIZE >= 3) // only if 3 or more
+            {
+                toCache.Add(imageInfoCache.ElementAt(index - 1).Value);
+            }
+
+            toCache.Add(imageInfoCache.ElementAt(index).Value);
+
+            if (((index + 1) < maxIndex) && CacheManager.CACHE_SIZE >= 2) // only if 2 or more
+            {
+                toCache.Add(imageInfoCache.ElementAt(index + 1).Value);
+            }
+
+            cacheManager.Add(toCache);
+        }
+        #endregion
+
         #region Events
 
         /// <summary>
@@ -436,34 +475,6 @@ namespace PictureSorter
             UpdateIsSelectedBackground();
 
             CacheAsync();
-        }
-
-        private async void CacheAsync()
-        {
-            await Task.Delay(10);
-
-            PrepareCache(selectedImageInfo.Index, imageInfoCache.Count);
-        }
-
-        private void PrepareCache(int index, int maxIndex)
-        {
-            if (0 == CacheManager.CACHE_SIZE) // no caching
-                return;
-
-            List<ImageInfo> toCache = new List<ImageInfo>();
-            if ((index > 0) && CacheManager.CACHE_SIZE >= 3) // only if 3 or more
-            {
-                toCache.Add(imageInfoCache.ElementAt(index - 1).Value);
-            }
-
-            toCache.Add(imageInfoCache.ElementAt(index).Value);
-
-            if (((index + 1) < maxIndex) && CacheManager.CACHE_SIZE >= 2) // only if 2 or more
-            {
-                toCache.Add(imageInfoCache.ElementAt(index + 1).Value);
-            }
-
-            cacheManager.Add(toCache);
         }
 
         /// <summary>
