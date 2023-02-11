@@ -9,7 +9,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Size = System.Drawing.Size;
+using System.Threading;
+using System.Globalization;
 
 namespace PictureSorter
 {
@@ -108,6 +109,15 @@ namespace PictureSorter
             ChooseFile();
         }
 
+        /// <summary>
+        /// Select the specified language
+        /// </summary>
+        private void ChangeLanguage()
+        {
+            throw new NotImplementedException($"'{nameof(ChangeLanguage)}' is not implemented yet");
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("fr-FR");
+        }
+
         #region Selection and File management
 
         /// <summary>
@@ -134,7 +144,7 @@ namespace PictureSorter
         /// </summary>
         private void ChooseFile()
         {
-            var dialog = new CommonOpenFileDialog("Sélectionner une image")
+            var dialog = new CommonOpenFileDialog(Properties.strings.SelectPictureStr)
             {
                 IsFolderPicker = false
             };
@@ -153,7 +163,7 @@ namespace PictureSorter
         /// </summary>
         private void ChooseFolder()
         {
-            var dialog = new CommonOpenFileDialog("Sélectionner le dossier contenant les images")
+            var dialog = new CommonOpenFileDialog(Properties.strings.SelectFolderStr)
             {
                 IsFolderPicker = true
             };
@@ -304,8 +314,8 @@ namespace PictureSorter
             if (0 == selectedImages.Count())
             {
                 MessageBox.Show(
-                    "Pas d'image sélectionnée trouvée",
-                    "Erreur",
+                    Properties.strings.NoPictureCheckedErrorStr,
+                    Properties.strings.ErrorStr,
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
@@ -314,7 +324,7 @@ namespace PictureSorter
 
             string folderSavePath = Path.Combine(
                 Path.GetDirectoryName(SelectedFolder),
-                Path.GetFileName(SelectedFolder) + " tri "
+                Path.GetFileName(SelectedFolder) + $" {Properties.strings.sortStr} "
             );
 
             int counter = 1;
@@ -393,11 +403,12 @@ namespace PictureSorter
         /// </summary>
         private void voirLaideToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string helpStr =
-                "1. Aller sous Fichier -> Ouvrir pour choisir une image dans le dossier contenant les images à sélectionner\n\n"
-                + "2. Trier les images en utilisant les flèches Haut et Bas et la barre Espace\n\n"
-                + "3. Aller sous Fichier -> 'Exporter les images'. Un nouveau dossier est crée";
-            MessageBox.Show(helpStr, "Aide", MessageBoxButtons.OK, MessageBoxIcon.Question);
+            MessageBox.Show(
+                Properties.strings.HelpStr,
+                "Aide",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Question
+            );
         }
 
         /// <summary>
