@@ -121,7 +121,11 @@
     <value>Error</value>
   </data>
   <data name="HelpStr" xml:space="preserve">
-    <value>1. Go to File -&gt; Open to select a picture in the folder containing the pictures.\n\n2. Sort the pictures using Up and Down keys and the Space bar.\n\n3. Go to File -&gt; Export pictures. A new folder is made.</value>
+    <value>1. Go to File -&gt; Open to select a picture in the folder containing the pictures.
+
+2. Sort the pictures using Up and Down keys and the Space bar.
+
+3. Go to File -&gt; Export pictures. A new folder is made.</value>
   </data>
   <data name="NoPictureCheckedErrorStr" xml:space="preserve">
     <value>No selected picture found</value>

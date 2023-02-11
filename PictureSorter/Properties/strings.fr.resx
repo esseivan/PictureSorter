@@ -121,7 +121,11 @@
     <value>Erreur</value>
   </data>
   <data name="HelpStr" xml:space="preserve">
-    <value>1. Aller sous Fichier -&gt; Ouvrir pour choisir une image dans le dossier contenant les images à sélectionner\n\n2. Trier les images en utilisant les flèches Haut et Bas et la barre Espace\n\n3. Aller sous Fichier -&gt; 'Exporter les images'. Un nouveau dossier est crée.</value>
+    <value>1. Aller sous Fichier -&gt; Ouvrir pour choisir une image dans le dossier contenant les images à sélectionner
+
+2. Trier les images en utilisant les flèches Haut et Bas et la barre Espace.
+
+3. Aller sous Fichier -&gt; 'Exporter les images'. Un nouveau dossier est crée.</value>
   </data>
   <data name="NoPictureCheckedErrorStr" xml:space="preserve">
     <value>Pas d'image sélectionnée trouvée</value>
