@@ -14,7 +14,7 @@ namespace PictureSorter
         /// <summary>
         /// Queue (fifo) of cached images
         /// </summary>
-        private static List<ImageInfo> imagesCached = new List<ImageInfo>(CACHE_SIZE);
+        private static readonly List<ImageInfo> imagesCached = new List<ImageInfo>(CACHE_SIZE);
 
         /// <summary>
         /// Add the list to the cache, removing all the old ones
