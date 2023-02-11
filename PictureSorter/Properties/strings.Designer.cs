@@ -70,7 +70,11 @@ namespace PictureSorter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 1. Go to File -&gt; Open to select a picture in the folder containing the pictures.\n\n2. Sort the pictures using Up and Down keys and the Space bar.\n\n3. Go to File -&gt; Export pictures. A new folder is made..
+        ///   Looks up a localized string similar to 1. Go to File -&gt; Open to select a picture in the folder containing the pictures.
+        ///
+        ///2. Sort the pictures using Up and Down keys and the Space bar.
+        ///
+        ///3. Go to File -&gt; Export pictures. A new folder is made..
         /// </summary>
         internal static string HelpStr {
             get {

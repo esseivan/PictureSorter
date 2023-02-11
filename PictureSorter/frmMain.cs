@@ -92,11 +92,20 @@ namespace PictureSorter
         }
 
         /// <summary>
+        /// Define wether the form is initialised
+        /// </summary>
+        private bool IsInit = false;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public frmMain()
         {
+            // Set language before components init
+            SetLanguage();
+
             InitializeComponent();
+            IsInit = true;
 
             selectedColorControl = panel1;
         }
@@ -110,12 +119,32 @@ namespace PictureSorter
         }
 
         /// <summary>
-        /// Select the specified language
+        /// Select the specified language. Can only be called before the init
         /// </summary>
-        private void ChangeLanguage()
+        private void SetLanguage()
         {
-            throw new NotImplementedException($"'{nameof(ChangeLanguage)}' is not implemented yet");
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo("fr-FR");
+            if (IsInit)
+                throw new InvalidOperationException(
+                    $"Unable to call {nameof(SetLanguage)} after initialisation"
+                );
+
+            Console.WriteLine("Language : " + Properties.Settings.Default.LanguageStr);
+
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(
+                Properties.Settings.Default.LanguageStr
+            );
+        }
+
+        private void ChangeLanguage(string languageStr)
+        {
+            // Verify that the languageStr is valid. Otherwise a exception will be thrown
+            _ = CultureInfo.GetCultureInfo(languageStr);
+            Properties.Settings.Default.LanguageStr = languageStr;
+            Properties.Settings.Default.Save();
+
+            // Restart app
+            Application.Restart();
+            Environment.Exit(0);
         }
 
         #region Selection and File management
@@ -524,5 +553,15 @@ namespace PictureSorter
         }
 
         #endregion
+
+        private void frenchToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ChangeLanguage("fr");
+        }
+
+        private void englishToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ChangeLanguage("en");
+        }
     }
 }
