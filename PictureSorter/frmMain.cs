@@ -53,6 +53,11 @@ namespace PictureSorter
         public string SelectedFolder = string.Empty;
 
         /// <summary>
+        /// Define wether the form is initialised
+        /// </summary>
+        private readonly bool IsFormInitialised = false;
+
+        /// <summary>
         /// Current version of the app
         /// </summary>
         public string VersionLabel
@@ -92,11 +97,6 @@ namespace PictureSorter
         }
 
         /// <summary>
-        /// Define wether the form is initialised
-        /// </summary>
-        private bool IsInit = false;
-
-        /// <summary>
         /// Constructor
         /// </summary>
         public frmMain()
@@ -105,7 +105,7 @@ namespace PictureSorter
             SetLanguage();
 
             InitializeComponent();
-            IsInit = true;
+            IsFormInitialised = true;
 
             selectedColorControl = panel1;
         }
@@ -123,7 +123,7 @@ namespace PictureSorter
         /// </summary>
         private void SetLanguage()
         {
-            if (IsInit)
+            if (IsFormInitialised)
                 throw new InvalidOperationException(
                     $"Unable to call {nameof(SetLanguage)} after initialisation"
                 );
@@ -219,9 +219,13 @@ namespace PictureSorter
             if (File.Exists(savePath))
                 File.SetAttributes(savePath, FileAttributes.Normal);
 
-            SettingsManager.SaveTo(savePath, imageInfoCache, backup, true);
-
-            File.SetAttributes(savePath, FileAttributes.Hidden);
+            SettingsManager.SaveTo(
+                savePath,
+                imageInfoCache,
+                backup: backup,
+                indent: true,
+                hide: true
+            );
 
             Console.WriteLine("Saved !");
         }
