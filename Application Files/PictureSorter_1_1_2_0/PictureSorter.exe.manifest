@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
-  <asmv1:assemblyIdentity name="PictureSorter.exe" version="1.1.1.0" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
+  <asmv1:assemblyIdentity name="PictureSorter.exe" version="1.1.2.0" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
   <description asmv2:iconFile="logo.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
   <application />
   <entryPoint>
@@ -43,14 +43,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="ESNLib.Tools.dll" size="27648">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="ESNLib.Tools.dll" size="33280">
       <assemblyIdentity name="ESNLib.Tools" version="1.0.6.6" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>tCRRFEyKlSDiikYVWxwnPiaZQRTwqc3Maw5gEmAr+x4=</dsig:DigestValue>
+        <dsig:DigestValue>nW00+PK1MyHEQIgFffoYi0Kf1UAuWb4TRE/nL4rwXVE=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -91,14 +91,38 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="PictureSorter.exe" size="240128">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="PictureSorter.exe" size="267264">
       <assemblyIdentity name="PictureSorter" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>CdY1P8WorY/mgYPA690UTyXFczmrsgoKmEOHh60ZDOw=</dsig:DigestValue>
+        <dsig:DigestValue>U/Ur4dIMM5fCmR8ZWbH7/tMezaM1p+EJvYcQKcMcfEQ=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="en\PictureSorter.resources.dll" size="115712">
+      <assemblyIdentity name="PictureSorter.resources" version="1.0.0.0" language="en" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>tSza9ilcLH/ii7NaCBBOAwAZOR127yHS/yMi+OVxYms=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="fr\PictureSorter.resources.dll" size="113152">
+      <assemblyIdentity name="PictureSorter.resources" version="1.0.0.0" language="fr" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>0zc3lwm9WJk/lohg/0gmi87xMJRorzYhb3fRROBVc3g=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -163,14 +187,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="System.Text.Json.dll" size="582832">
-      <assemblyIdentity name="System.Text.Json" version="7.0.0.1" publicKeyToken="CC7B13FFCD2DDD51" language="neutral" processorArchitecture="msil" />
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="System.Text.Json.dll" size="582320">
+      <assemblyIdentity name="System.Text.Json" version="7.0.0.3" publicKeyToken="CC7B13FFCD2DDD51" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>CQqeO5WRwFvR3zaZL92NTqvU/CpvLQhJDKDUEK/1Llo=</dsig:DigestValue>
+        <dsig:DigestValue>0U28NPaCR1fm9q51iwX3bER/lvjXW+PEuChvzFo4izA=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -207,13 +231,13 @@
       <dsig:DigestValue>mjSYAIl6SMC7TGG89t8Cs8oW/2X4w18kU1Lpx4hEF3Q=</dsig:DigestValue>
     </hash>
   </file>
-  <file name="PictureSorter.exe.config" size="972">
+  <file name="PictureSorter.exe.config" size="1686">
     <hash>
       <dsig:Transforms>
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>sL0fo0gW+CVQFMMNSQ+hpvh6ant1/X6O12gIpYERxAw=</dsig:DigestValue>
+      <dsig:DigestValue>KTg7IkswB8KyRORuwiEacA36Iljxl1wE7r7qVC6Buz8=</dsig:DigestValue>
     </hash>
   </file>
 </asmv1:assembly>
