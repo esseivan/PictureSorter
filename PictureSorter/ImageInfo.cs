@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ESNLib.Tools;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Text.Json.Serialization;
@@ -82,6 +83,7 @@ namespace PictureSorter
             if (null != CachedImage)
                 return;
 
+            Logger.Instance.Write($"[CacheManager] [Caching]   {FullPath}");
             Console.WriteLine($"'{FullPath}' cached");
             CachedImage = ReadImage();
         }
@@ -95,6 +97,7 @@ namespace PictureSorter
                 );
             }
 
+            Logger.Instance.Write($"[CacheManager] [Decaching] {FullPath}");
             Console.WriteLine($"'{FullPath}' decached");
             CachedImage = null;
         }

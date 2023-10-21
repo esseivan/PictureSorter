@@ -40,17 +40,22 @@ namespace PictureSorter
         /// <summary>
         /// The extensions of the image files available
         /// </summary>
-        private readonly string[] filters = new string[] { "*.png", "*.jpg", "*.jpeg", "*.bmp" };
+        private string[] filters => AppSettingsManager.Instance.FileExtensionsFilter;
 
         /// <summary>
         /// The name of the saved progress file
         /// </summary>
-        private const string saveFileName = "pictureSorter.pssave";
+        private string saveFileName => AppSettingsManager.Instance.AppSaveFileName;
 
         /// <summary>
         /// The currently selected folder
         /// </summary>
         public string SelectedFolder = string.Empty;
+
+        /// <summary>
+        /// Define wether the form is initialised
+        /// </summary>
+        private readonly bool IsFormInitialised = false;
 
         /// <summary>
         /// Current version of the app
@@ -92,11 +97,6 @@ namespace PictureSorter
         }
 
         /// <summary>
-        /// Define wether the form is initialised
-        /// </summary>
-        private bool IsInit = false;
-
-        /// <summary>
         /// Constructor
         /// </summary>
         public frmMain()
@@ -105,7 +105,25 @@ namespace PictureSorter
             SetLanguage();
 
             InitializeComponent();
-            IsInit = true;
+
+            Logger appLogger = new Logger
+            {
+                FilePath = Logger.GetDefaultLogPath("ESN", "PictureSorter", "log.txt"),
+                FilenameMode = Logger.FilenamesModes.FileName_DateSuffix,
+                WriteMode = Logger.WriteModes.Append,
+            };
+            if (!appLogger.Enable())
+            {
+                MessageBox.Show(
+                    "Unable to enable the logger...",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+            }
+            appLogger.Write("Application ready !", Logger.LogLevels.Info);
+
+            IsFormInitialised = true;
 
             selectedColorControl = panel1;
         }
@@ -123,12 +141,13 @@ namespace PictureSorter
         /// </summary>
         private void SetLanguage()
         {
-            if (IsInit)
+            if (IsFormInitialised)
                 throw new InvalidOperationException(
                     $"Unable to call {nameof(SetLanguage)} after initialisation"
                 );
 
             Console.WriteLine("Language : " + Properties.Settings.Default.LanguageStr);
+            Logger.Instance.Write("Language : " + Properties.Settings.Default.LanguageStr);
 
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(
                 Properties.Settings.Default.LanguageStr
@@ -141,6 +160,8 @@ namespace PictureSorter
             _ = CultureInfo.GetCultureInfo(languageStr);
             Properties.Settings.Default.LanguageStr = languageStr;
             Properties.Settings.Default.Save();
+
+            Logger.Instance.Write("Language change requested...");
 
             // Restart app
             Application.Restart();
@@ -219,10 +240,18 @@ namespace PictureSorter
             if (File.Exists(savePath))
                 File.SetAttributes(savePath, FileAttributes.Normal);
 
-            SettingsManager.SaveTo(savePath, imageInfoCache, backup, true);
+            SettingsManager.SaveTo(
+                savePath,
+                imageInfoCache,
+                backup: backup
+                    ? SettingsManager.BackupMode.dotBak
+                    : SettingsManager.BackupMode.None,
+                indent: true,
+                hide: true,
+                zipFile: false
+            );
 
-            File.SetAttributes(savePath, FileAttributes.Hidden);
-
+            Logger.Instance.Write($"Progres saved to '${savePath}'");
             Console.WriteLine("Saved !");
         }
 
@@ -236,8 +265,31 @@ namespace PictureSorter
             if (!File.Exists(savePath))
                 return;
 
-            if (!SettingsManager.LoadFrom(savePath, out Dictionary<string, ImageInfo> loadedData))
+            Logger.Instance.Write($"Loading progress '{savePath}'");
+
+            Dictionary<string, ImageInfo> loadedData;
+            try
+            {
+                bool loadSuccess = SettingsManager.LoadFrom(
+                    path: savePath,
+                    output: out loadedData,
+                    zipFile: false
+                );
+
+                if (!loadSuccess)
+                    return;
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Write("Failed to load progress...", Logger.LogLevels.Error);
+                MessageBox.Show(
+                    "Error loading progress : \n" + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
                 return;
+            }
 
             // Apply only the IsSelected property
             foreach (var dataItem in loadedData)
@@ -247,6 +299,7 @@ namespace PictureSorter
                     imageInfoCache[dataItem.Key].IsSelected = dataItem.Value.IsSelected;
                 }
             }
+            Logger.Instance.Write("Progress loaded");
         }
 
         #endregion
@@ -261,6 +314,8 @@ namespace PictureSorter
         {
             if (!Directory.Exists(directoryPath))
                 return;
+
+            Logger.Instance.Write($"Loading directory '{directoryPath}'");
 
             SelectedFolder = directoryPath;
 
@@ -311,6 +366,7 @@ namespace PictureSorter
                 treeView1.SelectedNode = treeView1.Nodes[0];
 
             treeView1.Focus();
+            Logger.Instance.Write($"Directory loading complete !");
         }
 
         /// <summary>
@@ -350,6 +406,7 @@ namespace PictureSorter
                 );
                 return;
             }
+            Logger.Instance.Write($"Exporting {selectedImages.Count()} images...");
 
             string folderSavePath = Path.Combine(
                 Path.GetDirectoryName(SelectedFolder),
@@ -363,7 +420,9 @@ namespace PictureSorter
             }
             folderSavePath += counter;
             Directory.CreateDirectory(folderSavePath);
+            Logger.Instance.Write($"Folder choosen : {folderSavePath}");
 
+            Logger.Instance.Write($"Saving to '{folderSavePath}'");
             Console.WriteLine($"Saving to '{folderSavePath}'");
 
             foreach (var file in selectedImages)
@@ -373,6 +432,7 @@ namespace PictureSorter
                 File.Copy(srcPath, destPath, false);
             }
 
+            Logger.Instance.Write("Exporting complete !");
             Process.Start(folderSavePath);
         }
 
@@ -397,19 +457,28 @@ namespace PictureSorter
         /// <param name="maxIndex">Number of images in the list</param>
         private void PrepareCache(int index, int maxIndex)
         {
-            if (0 == CacheManager.CACHE_SIZE) // no caching
+            if (0 == CacheManager.CACHE_MAX_SIZE) // no caching
                 return;
 
+            // Caching priority :
+            //  1. Present image (always)
+            //  2. Next image (in top to bottom direction)
+            //  3. Previous image (in top to bottom direction)
+            // The manager will decache the oldest images
+
             List<ImageInfo> toCache = new List<ImageInfo>();
-            if ((index > 0) && CacheManager.CACHE_SIZE >= 3) // only if 3 or more
+            if ((index > 0) && CacheManager.CACHE_MAX_SIZE >= 3) // only if 3 or more
             {
+                Logger.Instance.Write("Caching previous");
                 toCache.Add(imageInfoCache.ElementAt(index - 1).Value);
             }
 
+            Logger.Instance.Write($"Caching current, index={index}");
             toCache.Add(imageInfoCache.ElementAt(index).Value);
 
-            if (((index + 1) < maxIndex) && CacheManager.CACHE_SIZE >= 2) // only if 2 or more
+            if (((index + 1) < maxIndex) && CacheManager.CACHE_MAX_SIZE >= 2) // only if 2 or more
             {
+                Logger.Instance.Write("Caching next");
                 toCache.Add(imageInfoCache.ElementAt(index + 1).Value);
             }
 
@@ -424,6 +493,7 @@ namespace PictureSorter
         /// </summary>
         private void quitterToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            Logger.Instance.Write("Application Closing...");
             Close();
         }
 
@@ -545,14 +615,12 @@ namespace PictureSorter
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show(
-                $"{VersionLabel}\nMade by EsseivaN",
+                $"{VersionLabel}\nMade by EsseivaN\nhttps://github.com/esseivan/PictureSorter",
                 "About",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information
             );
         }
-
-        #endregion
 
         private void frenchToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -563,5 +631,7 @@ namespace PictureSorter
         {
             ChangeLanguage("en");
         }
+
+        #endregion
     }
 }
