@@ -22,6 +22,9 @@ namespace PictureSorter
         public string FullPath { get; set; }
 
         [JsonIgnore]
+        public string FileName { get; set; }
+
+        [JsonIgnore]
         public int Index { get; set; }
         private bool _isSelected = true;
         public bool IsSelected
@@ -59,11 +62,11 @@ namespace PictureSorter
         {
             Image outputImage = Image.FromFile(FullPath);
             outputImage = ImageTools.FixRotation(outputImage);
-            outputImage = ImageTools.applyBorderToImage(
-                outputImage,
-                IsSelected ? colorSelected : colorNotSelected,
-                0.01f // 1 %
-            );
+            //outputImage = ImageTools.applyBorderToImage(
+            //    outputImage,
+            //    IsSelected ? colorSelected : colorNotSelected,
+            //    0.01f // 1 %
+            //);
             GC.Collect();
             return outputImage;
         }

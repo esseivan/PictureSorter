@@ -19,11 +19,18 @@ namespace PictureSorter
 {
     public partial class frmMain : Form
     {
+        private const bool INDENT_SAVE_FILE = false;
+
         /// <summary>
         /// Keep track of the images informations in the selected directory
         /// </summary>
         private readonly Dictionary<string, ImageInfo> imageInfoCache =
             new Dictionary<string, ImageInfo>();
+
+        /// <summary>
+        /// Keep track of the images informations in the selected directory
+        /// </summary>
+        private readonly Dictionary<int, string> imageInfoIndices = new Dictionary<int, string>();
 
         /// <summary>
         /// The currently selected image from the treeview
@@ -249,7 +256,7 @@ namespace PictureSorter
                 backup: backup
                     ? SettingsManager.BackupMode.dotBak
                     : SettingsManager.BackupMode.None,
-                indent: true,
+                indent: INDENT_SAVE_FILE,
                 hide: true,
                 zipFile: false
             );
@@ -399,6 +406,7 @@ namespace PictureSorter
 
             cacheManager.Clear();
             imageInfoCache.Clear();
+            imageInfoIndices.Clear();
             treeView1.Nodes.Clear();
 
             List<string> imageFiles = new List<string>();
@@ -407,7 +415,6 @@ namespace PictureSorter
                 imageFiles.AddRange(Directory.GetFiles(directoryPath, filter));
             }
 
-            int imageIndex = 0;
             foreach (string imageFullPath in imageFiles)
             {
                 // Full path to the image
@@ -416,8 +423,8 @@ namespace PictureSorter
                 // New treeview node
                 TreeNode node = new TreeNode
                 {
-                    ImageIndex = imageIndex,
-                    SelectedImageIndex = imageIndex,
+                    ImageIndex = -1,
+                    SelectedImageIndex = -1,
                     Text = imageFileName,
                 };
 
@@ -425,16 +432,14 @@ namespace PictureSorter
                 ImageInfo imageInfo = new ImageInfo
                 {
                     FullPath = imageFullPath,
-                    Index = imageIndex,
+                    FileName = imageFileName,
+                    Index = -1,
                     Node = node,
                     IsSelected = true
                 };
 
                 // Cache the image info
                 imageInfoCache[imageFileName] = imageInfo;
-
-                // Add the treeview node
-                imageIndex++;
             }
 
             UpdateFromSave(); // Update selection from save
@@ -474,8 +479,13 @@ namespace PictureSorter
 
             List<ImageInfo> images = imageInfoCache.Values.ToList();
             images.Sort((x, y) => x.DateTimeTaken.CompareTo(y.DateTimeTaken));
+            int i = 0;
             foreach (ImageInfo item in images)
             {
+                item.Index = i;
+                item.Node.ImageIndex = item.Node.SelectedImageIndex = i;
+
+                imageInfoIndices.Add(i++, item.FileName);
                 treeView1.Nodes.Add(item.Node);
             }
 
@@ -584,19 +594,23 @@ namespace PictureSorter
             // The manager will decache the oldest images
 
             List<ImageInfo> toCache = new List<ImageInfo>();
+            string path;
             if ((index > 0) && CacheManager.CACHE_MAX_SIZE >= 3) // only if 3 or more
             {
                 Logger.Instance.Write("Caching previous");
-                toCache.Add(imageInfoCache.ElementAt(index - 1).Value);
+                path = imageInfoIndices[index - 1];
+                toCache.Add(imageInfoCache[path]);
             }
 
             Logger.Instance.Write($"Caching current, index={index}");
-            toCache.Add(imageInfoCache.ElementAt(index).Value);
+            path = imageInfoIndices[index];
+            toCache.Add(imageInfoCache[path]);
 
             if (((index + 1) < maxIndex) && CacheManager.CACHE_MAX_SIZE >= 2) // only if 2 or more
             {
                 Logger.Instance.Write("Caching next");
-                toCache.Add(imageInfoCache.ElementAt(index + 1).Value);
+                path = imageInfoIndices[index + 1];
+                toCache.Add(imageInfoCache[path]);
             }
 
             cacheManager.Add(toCache);
@@ -632,13 +646,18 @@ namespace PictureSorter
         /// </summary>
         private void toutCocherToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // Backup current save
-            SaveToFile(true);
-
             foreach (ImageInfo imageInfo in imageInfoCache.Values)
             {
                 imageInfo.IsSelected = true;
             }
+
+            UpdateIsSelectedBackground();
+            // Update picturebox image (border)
+            pictureBox1.Image = selectedImageInfo.ReapplyBorder(pictureBox1.Image);
+            GC.Collect();
+
+            // Save
+            SaveToFile(true);
         }
 
         /// <summary>
@@ -646,13 +665,18 @@ namespace PictureSorter
         /// </summary>
         private void toutDécocherToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            // Backup current save
-            SaveToFile(true);
-
             foreach (ImageInfo imageInfo in imageInfoCache.Values)
             {
                 imageInfo.IsSelected = false;
             }
+
+            UpdateIsSelectedBackground();
+            // Update picturebox image (border)
+            pictureBox1.Image = selectedImageInfo.ReapplyBorder(pictureBox1.Image);
+            GC.Collect();
+
+            // Save
+            SaveToFile(true);
         }
 
         /// <summary>
@@ -677,7 +701,14 @@ namespace PictureSorter
             selectedImageInfo = imageInfoCache[selectedFilePath];
 
             // Set the picturebox image. Generally cached
-            pictureBox1.Image = selectedImageInfo.GetImageAndCache();
+            Image img = selectedImageInfo.GetImageAndCache();
+
+            img = ImageTools.applyBorderToImage(
+                img,
+                selectedImageInfo.IsSelected ? ImageInfo.colorSelected : ImageInfo.colorNotSelected,
+                0.01f // 1 %
+            );
+            pictureBox1.Image = img;
 
             UpdateIsSelectedBackground();
 
