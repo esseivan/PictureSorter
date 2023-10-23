@@ -53,9 +53,7 @@
             this.frenchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
-            this.modeAvancéToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.renommerDossierToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -191,8 +189,7 @@
             this.aideToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.voirLaideToolStripMenuItem,
             this.aboutToolStripMenuItem,
-            this.toolStripSeparator3,
-            this.modeAvancéToolStripMenuItem});
+            this.toolStripSeparator3});
             this.aideToolStripMenuItem.Name = "aideToolStripMenuItem";
             resources.ApplyResources(this.aideToolStripMenuItem, "aideToolStripMenuItem");
             // 
@@ -242,23 +239,10 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // modeAvancéToolStripMenuItem
-            // 
-            this.modeAvancéToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.renommerDossierToolStripMenuItem});
-            this.modeAvancéToolStripMenuItem.Name = "modeAvancéToolStripMenuItem";
-            resources.ApplyResources(this.modeAvancéToolStripMenuItem, "modeAvancéToolStripMenuItem");
-            // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             resources.ApplyResources(this.toolStripSeparator3, "toolStripSeparator3");
-            // 
-            // renommerDossierToolStripMenuItem
-            // 
-            this.renommerDossierToolStripMenuItem.Name = "renommerDossierToolStripMenuItem";
-            resources.ApplyResources(this.renommerDossierToolStripMenuItem, "renommerDossierToolStripMenuItem");
-            this.renommerDossierToolStripMenuItem.Click += new System.EventHandler(this.renommerDossierToolStripMenuItem_Click);
             // 
             // frmMain
             // 
@@ -312,8 +296,6 @@
         private System.Windows.Forms.ToolStripMenuItem englishToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem frenchToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.ToolStripMenuItem modeAvancéToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem renommerDossierToolStripMenuItem;
     }
 }
 

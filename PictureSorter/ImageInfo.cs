@@ -35,6 +35,11 @@ namespace PictureSorter
             }
         }
 
+        /// <summary>
+        /// The time where the image was taken
+        /// </summary>
+        public DateTime DateTimeTaken { get; set; } = DateTime.MinValue;
+
         [JsonIgnore]
         public TreeNode Node { get; set; }
 

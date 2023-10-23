@@ -300,6 +300,7 @@ namespace PictureSorter
                 if (imageInfoCache.ContainsKey(dataItem.Key))
                 {
                     imageInfoCache[dataItem.Key].IsSelected = dataItem.Value.IsSelected;
+                    imageInfoCache[dataItem.Key].DateTimeTaken = dataItem.Value.DateTimeTaken;
                 }
             }
             Logger.Instance.Write("Progress loaded");
@@ -327,22 +328,16 @@ namespace PictureSorter
                     }
                 }
             }
+            Logger.Instance.Write($"Date not found in {filePath}", Logger.LogLevels.Error);
 
-            throw new InvalidOperationException($"Date not found in {filePath}");
+            return DateTime.MinValue;
         }
 
         /// <summary>
         /// Sort the images according the the date taken
         /// </summary>
-        public List<string> RenameImageFilesByDateTaken(string directoryPath)
+        public List<string> SortImageFilesByDateTaken(List<string> imageFiles)
         {
-            // Load images
-            List<string> imageFiles = new List<string>();
-            foreach (string filter in filters)
-            {
-                imageFiles.AddRange(Directory.GetFiles(directoryPath, filter));
-            }
-
             List<ImageDateInfo> imageList = new List<ImageDateInfo>();
 
             foreach (string filePath in imageFiles)
@@ -352,23 +347,16 @@ namespace PictureSorter
                 {
                     DateTime dt = GetJpegDate(filePath);
                     info.DateTaken = dt;
-                    string fileName = $"IMG_{dt:yyyyMMdd_HHmmss}.{Path.GetExtension(filePath)}"; // In case of renaming all files
-                    string destPath = Path.Combine(directoryPath, fileName);
-
-                    Logger.Instance.Write($"Renaming '{filePath}' to '{destPath}'...");
-                    File.Move(filePath, destPath);
-                    int counter = 0;
-
-                    Console.WriteLine(fileName);
                 }
                 catch (Exception ex)
                 {
+                    info.DateTaken = DateTime.MinValue;
+
                     // Handle exceptions (e.g., if the file does not have EXIF information)
                     Logger.Instance.Write(
                         $"Unable to retrieve exif for '{filePath}' : {ex.Message}",
                         Logger.LogLevels.Error
                     );
-                    info.DateTaken = DateTime.MinValue;
                 }
                 imageList.Add(info);
             }
@@ -377,7 +365,7 @@ namespace PictureSorter
             imageList = imageList.OrderBy(img => img.DateTaken).ToList();
 
             // Extract the file paths from the sorted ImageInfo list
-            sortedImageFiles = imageList.Select(img => img.FilePath).ToList();
+            List<string> sortedImageFiles = imageList.Select(img => img.FilePath).ToList();
 
             return sortedImageFiles;
         }
@@ -391,15 +379,9 @@ namespace PictureSorter
         /// <summary>
         /// Rename a whole directory images according the the date taken of the picture
         /// </summary>
-        private void RenameDirectoryContent(string directoryPath)
+        private void SortDirectoryContent(string directoryPath)
         {
             Logger.Instance.Write($"Renaming directory content '{directoryPath}'");
-
-            Logger.Instance.Write($"Processing...");
-            Cursor.Current = Cursors.WaitCursor;
-            RenameImageFilesByDateTaken(directoryPath);
-            Cursor.Current = Cursors.Default;
-            Logger.Instance.Write($"Processing complete");
         }
 
         /// <summary>
@@ -447,6 +429,7 @@ namespace PictureSorter
                     Node = node,
                     IsSelected = true
                 };
+
                 // Cache the image info
                 imageInfoCache[imageFileName] = imageInfo;
 
@@ -457,6 +440,38 @@ namespace PictureSorter
 
             UpdateFromSave(); // Update selection from save
             SaveToFile(); // Save. Maybe more images, maybe no save yet
+
+            Logger.Instance.Write($"Processing missing DateTimeTaken...");
+            frmProcessing frm = new frmProcessing();
+            frm.Show();
+            //Application.DoEvents();
+            Cursor.Current = Cursors.WaitCursor;
+            // Update missing dateTimeTaken infos
+            foreach (var item in imageInfoCache)
+            {
+                if (item.Value.DateTimeTaken == DateTime.MinValue)
+                {
+                    try
+                    {
+                        DateTime dt = GetJpegDate(item.Value.FullPath);
+                        item.Value.DateTimeTaken = dt;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Handle exceptions (e.g., if the file does not have EXIF information)
+                        Logger.Instance.Write(
+                            $"Unable to retrieve exif for '{item.Value.FullPath}' : {ex.Message}",
+                            Logger.LogLevels.Error
+                        );
+                    }
+                }
+            }
+
+            frm.Close();
+            Cursor.Current = Cursors.Default;
+            Logger.Instance.Write($"Processing complete, saving...");
+            SaveToFile(); // Save. Maybe more images, maybe no save yet
+            Logger.Instance.Write($"Saving complete");
 
             if (imageInfoCache.Count > 0)
                 treeView1.SelectedNode = treeView1.Nodes[0];
@@ -726,22 +741,6 @@ namespace PictureSorter
         private void englishToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ChangeLanguage("en");
-        }
-
-        private void renommerDossierToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var dialog = new CommonOpenFileDialog(Properties.strings.SelectPictureStr)
-            {
-                IsFolderPicker = false
-            };
-            CommonFileDialogResult result = dialog.ShowDialog();
-
-            if (result == CommonFileDialogResult.Ok)
-            {
-                string folder = Path.GetDirectoryName(dialog.FileName);
-
-                RenameDirectoryContent(folder);
-            }
         }
 
         #endregion
