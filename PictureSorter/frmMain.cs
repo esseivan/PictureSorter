@@ -434,7 +434,6 @@ namespace PictureSorter
                 imageInfoCache[imageFileName] = imageInfo;
 
                 // Add the treeview node
-                treeView1.Nodes.Add(node);
                 imageIndex++;
             }
 
@@ -471,7 +470,14 @@ namespace PictureSorter
             Cursor.Current = Cursors.Default;
             Logger.Instance.Write($"Processing complete, saving...");
             SaveToFile(); // Save. Maybe more images, maybe no save yet
-            Logger.Instance.Write($"Saving complete");
+            Logger.Instance.Write($"Saving complete. Displaying images...");
+
+            List<ImageInfo> images = imageInfoCache.Values.ToList();
+            images.Sort((x, y) => x.DateTimeTaken.CompareTo(y.DateTimeTaken));
+            foreach (ImageInfo item in images)
+            {
+                treeView1.Nodes.Add(item.Node);
+            }
 
             if (imageInfoCache.Count > 0)
                 treeView1.SelectedNode = treeView1.Nodes[0];
