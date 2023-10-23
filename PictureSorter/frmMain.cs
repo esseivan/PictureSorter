@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
 using System.Globalization;
+using System.Drawing.Imaging;
+using System.Text;
+using System.Drawing;
 
 namespace PictureSorter
 {
@@ -305,6 +308,99 @@ namespace PictureSorter
         #endregion
 
         #region Image management
+
+        private DateTime GetJpegDate(string filePath)
+        {
+            var directories = MetadataExtractor.ImageMetadataReader.ReadMetadata(filePath);
+
+            foreach (var directory in directories)
+            {
+                foreach (var tag in directory.Tags)
+                {
+                    if (tag.Name == "Date/Time Original")
+                    {
+                        if (string.IsNullOrEmpty(tag.Description))
+                            continue;
+                        string d = tag.Description.Split(' ')[0].Replace(":", "-");
+                        string t = tag.Description.Split(' ')[1];
+                        return DateTime.Parse($"{d} {t}");
+                    }
+                }
+            }
+
+            throw new InvalidOperationException($"Date not found in {filePath}");
+        }
+
+        /// <summary>
+        /// Sort the images according the the date taken
+        /// </summary>
+        public List<string> RenameImageFilesByDateTaken(string directoryPath)
+        {
+            // Load images
+            List<string> imageFiles = new List<string>();
+            foreach (string filter in filters)
+            {
+                imageFiles.AddRange(Directory.GetFiles(directoryPath, filter));
+            }
+
+            List<ImageDateInfo> imageList = new List<ImageDateInfo>();
+
+            foreach (string filePath in imageFiles)
+            {
+                ImageDateInfo info = new ImageDateInfo { FilePath = filePath };
+                try
+                {
+                    DateTime dt = GetJpegDate(filePath);
+                    info.DateTaken = dt;
+                    string fileName = $"IMG_{dt:yyyyMMdd_HHmmss}.{Path.GetExtension(filePath)}"; // In case of renaming all files
+                    string destPath = Path.Combine(directoryPath, fileName);
+
+                    Logger.Instance.Write($"Renaming '{filePath}' to '{destPath}'...");
+                    File.Move(filePath, destPath);
+                    int counter = 0;
+
+                    Console.WriteLine(fileName);
+                }
+                catch (Exception ex)
+                {
+                    // Handle exceptions (e.g., if the file does not have EXIF information)
+                    Logger.Instance.Write(
+                        $"Unable to retrieve exif for '{filePath}' : {ex.Message}",
+                        Logger.LogLevels.Error
+                    );
+                    info.DateTaken = DateTime.MinValue;
+                }
+                imageList.Add(info);
+            }
+
+            // Sort the list by Date Taken in ascending order
+            imageList = imageList.OrderBy(img => img.DateTaken).ToList();
+
+            // Extract the file paths from the sorted ImageInfo list
+            sortedImageFiles = imageList.Select(img => img.FilePath).ToList();
+
+            return sortedImageFiles;
+        }
+
+        internal class ImageDateInfo
+        {
+            public string FilePath { get; set; }
+            public DateTime DateTaken { get; set; }
+        }
+
+        /// <summary>
+        /// Rename a whole directory images according the the date taken of the picture
+        /// </summary>
+        private void RenameDirectoryContent(string directoryPath)
+        {
+            Logger.Instance.Write($"Renaming directory content '{directoryPath}'");
+
+            Logger.Instance.Write($"Processing...");
+            Cursor.Current = Cursors.WaitCursor;
+            RenameImageFilesByDateTaken(directoryPath);
+            Cursor.Current = Cursors.Default;
+            Logger.Instance.Write($"Processing complete");
+        }
 
         /// <summary>
         /// Load images from the specified directory
@@ -630,6 +726,22 @@ namespace PictureSorter
         private void englishToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ChangeLanguage("en");
+        }
+
+        private void renommerDossierToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var dialog = new CommonOpenFileDialog(Properties.strings.SelectPictureStr)
+            {
+                IsFolderPicker = false
+            };
+            CommonFileDialogResult result = dialog.ShowDialog();
+
+            if (result == CommonFileDialogResult.Ok)
+            {
+                string folder = Path.GetDirectoryName(dialog.FileName);
+
+                RenameDirectoryContent(folder);
+            }
         }
 
         #endregion
