@@ -563,12 +563,32 @@ namespace PictureSorter
             Logger.Instance.Write($"Saving to '{folderSavePath}'");
             Console.WriteLine($"Saving to '{folderSavePath}'");
 
+            Dictionary<string, ImageInfo> exportedImages = new Dictionary<string, ImageInfo>();
             foreach (var file in selectedImages)
             {
                 string srcPath = Path.Combine(SelectedFolder, file.Key);
                 string destPath = Path.Combine(folderSavePath, file.Key);
                 File.Copy(srcPath, destPath, false);
+                // Also copy image info dateTime
+                exportedImages.Add(file.Key, file.Value);
             }
+
+            // Save the exportedImages informations
+            string savePath = Path.Combine(folderSavePath, saveFileName);
+            if (File.Exists(savePath))
+                File.SetAttributes(savePath, FileAttributes.Normal);
+
+            SettingsManager.SaveTo(
+                savePath,
+                exportedImages,
+                backup: SettingsManager.BackupMode.dotBak,
+                indent: INDENT_SAVE_FILE,
+                hide: true,
+                zipFile: false
+            );
+
+            Logger.Instance.Write($"Progres saved to '${savePath}'");
+            Console.WriteLine("Saved !");
 
             Logger.Instance.Write("Exporting complete !");
             Process.Start(folderSavePath);
