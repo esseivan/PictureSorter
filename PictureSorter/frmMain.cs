@@ -700,6 +700,9 @@ namespace PictureSorter
             string selectedFilePath = e.Node.FullPath;
             selectedImageInfo = imageInfoCache[selectedFilePath];
 
+            // Update selected image index
+            lblImageCounter.Text = $"{selectedImageInfo.Index + 1}/{imageInfoCache.Count}";
+
             // Set the picturebox image. Generally cached
             Image img = selectedImageInfo.GetImageAndCache();
 
