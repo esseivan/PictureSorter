@@ -21,5 +21,10 @@
         /// </summary>
         public string[] FileExtensionsFilter { get; set; } =
             new string[] { "*.png", "*.jpg", "*.jpeg", "*.bmp" };
+
+        /// <summary>
+        /// Whether to open the recently exported folder in the application. This is usefull for chaining sorting
+        /// </summary>
+        public bool OpenFolderInAppAfterExport { get; set; } = true;
     }
 }

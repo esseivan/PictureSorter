@@ -14,6 +14,7 @@ using System.Globalization;
 using System.Drawing.Imaging;
 using System.Text;
 using System.Drawing;
+using System.Text.RegularExpressions;
 
 namespace PictureSorter
 {
@@ -448,7 +449,7 @@ namespace PictureSorter
             Logger.Instance.Write($"Processing missing DateTimeTaken...");
             frmProcessing frm = new frmProcessing();
             frm.Show();
-            //Application.DoEvents();
+            Application.DoEvents();
             Cursor.Current = Cursors.WaitCursor;
             // Update missing dateTimeTaken infos
             foreach (var item in imageInfoCache)
@@ -535,9 +536,19 @@ namespace PictureSorter
             }
             Logger.Instance.Write($"Exporting {selectedImages.Count()} images...");
 
+            string directoryName = Path.GetFileName(SelectedFolder);
+            // Check if current directory match the sortStr
+            Regex matchSortStr = new Regex("^(.*)( tri [1-9][0-9]*)$");
+            Match result = matchSortStr.Match(SelectedFolder);
+            if (result.Success)
+            {
+                // When it does, remove that part from the output directory.
+                // That correspond to keeping the group1 (the "(.*)" from the regex)
+                directoryName = result.Groups[1].Value;
+            }
             string folderSavePath = Path.Combine(
                 Path.GetDirectoryName(SelectedFolder),
-                Path.GetFileName(SelectedFolder) + $" {Properties.strings.sortStr} "
+                directoryName + $" {Properties.strings.sortStr} "
             );
 
             int counter = 1;
@@ -552,15 +563,41 @@ namespace PictureSorter
             Logger.Instance.Write($"Saving to '{folderSavePath}'");
             Console.WriteLine($"Saving to '{folderSavePath}'");
 
+            Dictionary<string, ImageInfo> exportedImages = new Dictionary<string, ImageInfo>();
             foreach (var file in selectedImages)
             {
                 string srcPath = Path.Combine(SelectedFolder, file.Key);
                 string destPath = Path.Combine(folderSavePath, file.Key);
                 File.Copy(srcPath, destPath, false);
+                // Also copy image info dateTime
+                exportedImages.Add(file.Key, file.Value);
             }
+
+            // Save the exportedImages informations
+            string savePath = Path.Combine(folderSavePath, saveFileName);
+            if (File.Exists(savePath))
+                File.SetAttributes(savePath, FileAttributes.Normal);
+
+            SettingsManager.SaveTo(
+                savePath,
+                exportedImages,
+                backup: SettingsManager.BackupMode.dotBak,
+                indent: INDENT_SAVE_FILE,
+                hide: true,
+                zipFile: false
+            );
+
+            Logger.Instance.Write($"Progres saved to '${savePath}'");
+            Console.WriteLine("Saved !");
 
             Logger.Instance.Write("Exporting complete !");
             Process.Start(folderSavePath);
+
+            if (AppSettingsManager.Instance.OpenFolderInAppAfterExport)
+            {
+                Logger.Instance.Write("Openning new folder just after export...");
+                LoadImages(folderSavePath);
+            }
         }
 
         #endregion
@@ -699,6 +736,9 @@ namespace PictureSorter
         {
             string selectedFilePath = e.Node.FullPath;
             selectedImageInfo = imageInfoCache[selectedFilePath];
+
+            // Update selected image index
+            lblImageCounter.Text = $"{selectedImageInfo.Index + 1}/{imageInfoCache.Count}";
 
             // Set the picturebox image. Generally cached
             Image img = selectedImageInfo.GetImageAndCache();
