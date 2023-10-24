@@ -592,6 +592,12 @@ namespace PictureSorter
 
             Logger.Instance.Write("Exporting complete !");
             Process.Start(folderSavePath);
+
+            if (AppSettingsManager.Instance.OpenFolderInAppAfterExport)
+            {
+                Logger.Instance.Write("Openning new folder just after export...");
+                LoadImages(folderSavePath);
+            }
         }
 
         #endregion
