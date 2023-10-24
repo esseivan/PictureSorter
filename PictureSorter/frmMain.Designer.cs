@@ -55,6 +55,7 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
             this.lblImageCounter = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -232,6 +233,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.label1);
             this.panel1.Controls.Add(this.lblImageCounter);
             this.panel1.Controls.Add(this.button1);
             resources.ApplyResources(this.panel1, "panel1");
@@ -249,6 +251,11 @@
             // 
             resources.ApplyResources(this.lblImageCounter, "lblImageCounter");
             this.lblImageCounter.Name = "lblImageCounter";
+            // 
+            // label1
+            // 
+            resources.ApplyResources(this.label1, "label1");
+            this.label1.Name = "label1";
             // 
             // frmMain
             // 
@@ -304,6 +311,7 @@
         private System.Windows.Forms.ToolStripMenuItem frenchToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.Label lblImageCounter;
+        private System.Windows.Forms.Label label1;
     }
 }
 
