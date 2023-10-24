@@ -14,6 +14,7 @@ using System.Globalization;
 using System.Drawing.Imaging;
 using System.Text;
 using System.Drawing;
+using System.Text.RegularExpressions;
 
 namespace PictureSorter
 {
@@ -535,9 +536,19 @@ namespace PictureSorter
             }
             Logger.Instance.Write($"Exporting {selectedImages.Count()} images...");
 
+            string directoryName = Path.GetFileName(SelectedFolder);
+            // Check if current directory match the sortStr
+            Regex matchSortStr = new Regex("^(.*)( tri [1-9][0-9]*)$");
+            Match result = matchSortStr.Match(SelectedFolder);
+            if (result.Success)
+            {
+                // When it does, remove that part from the output directory.
+                // That correspond to keeping the group1 (the "(.*)" from the regex)
+                directoryName = result.Groups[1].Value;
+            }
             string folderSavePath = Path.Combine(
                 Path.GetDirectoryName(SelectedFolder),
-                Path.GetFileName(SelectedFolder) + $" {Properties.strings.sortStr} "
+                directoryName + $" {Properties.strings.sortStr} "
             );
 
             int counter = 1;
