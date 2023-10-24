@@ -448,7 +448,7 @@ namespace PictureSorter
             Logger.Instance.Write($"Processing missing DateTimeTaken...");
             frmProcessing frm = new frmProcessing();
             frm.Show();
-            //Application.DoEvents();
+            Application.DoEvents();
             Cursor.Current = Cursors.WaitCursor;
             // Update missing dateTimeTaken infos
             foreach (var item in imageInfoCache)
