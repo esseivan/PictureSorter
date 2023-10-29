@@ -139,4 +139,8 @@
   <data name="sortStr" xml:space="preserve">
     <value>sort</value>
   </data>
+  <data name="warningLockedStr" xml:space="preserve">
+    <value>This folder is already loaded in another instance of the application. Make sure that the application is not already open.
+Still open the folder ?</value>
+  </data>
 </root>

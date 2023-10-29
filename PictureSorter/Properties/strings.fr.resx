@@ -139,4 +139,8 @@
   <data name="sortStr" xml:space="preserve">
     <value>tri</value>
   </data>
+  <data name="warningLockedStr" xml:space="preserve">
+    <value>Ce dossier est déjà ouvert dans une autre fenêtre de l'application. Vérifier que cette application est lancée une seule fois (une seule fenêtre).
+Ouvrir tout de même le dossier ?</value>
+  </data>
 </root>

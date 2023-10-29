@@ -117,5 +117,15 @@ namespace PictureSorter.Properties {
                 return ResourceManager.GetString("sortStr", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This folder is already loaded in another instance of the application. Make sure that the application is not already open.
+        ///Still open the folder ?.
+        /// </summary>
+        internal static string warningLockedStr {
+            get {
+                return ResourceManager.GetString("warningLockedStr", resourceCulture);
+            }
+        }
     }
 }

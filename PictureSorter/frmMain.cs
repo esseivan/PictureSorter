@@ -23,6 +23,8 @@ namespace PictureSorter
         private bool INDENT_SAVE_FILE => AppSettingsManager.Instance.IndentSaveFile;
         private bool HIDE_SAVE_FILE => AppSettingsManager.Instance.HideSaveFile;
 
+        private string LOCK_FILENAME => "psorter.lock";
+
         /// <summary>
         /// Keep track of the images informations in the selected directory
         /// </summary>
@@ -268,6 +270,65 @@ namespace PictureSorter
         }
 
         /// <summary>
+        /// Try to lock the folder by creating a .lock file. If already present, ask the user
+        /// </summary>
+        /// <returns>If the folder can be open (no lock file present or user forced)</returns>
+        private bool LockFolder()
+        {
+            string lockFilePath = Path.Combine(SelectedFolder, LOCK_FILENAME);
+            if (File.Exists(lockFilePath))
+            {
+                Logger.Instance.Write("Lock file already present...", Logger.LogLevels.Warn);
+                // Already open from another app, or not properly exited the app
+                // So asking the user if he want to open anyway
+                DialogResult result = MessageBox.Show(
+                    Properties.strings.warningLockedStr,
+                    "Warning",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Warning
+                );
+                if (result != DialogResult.Yes)
+                {
+                    // Indicate not available
+                    return false;
+                }
+
+                // Indicate available
+                return true;
+            }
+            else
+            {
+                File.Create(lockFilePath).Dispose();
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Unload and unlock current folder
+        /// </summary>
+        private void UnloadFolder()
+        {
+            // Invalid or no selected folder
+            if (!Directory.Exists(SelectedFolder))
+            {
+                return;
+            }
+
+            Logger.Instance.Write("Unlocking folder...", Logger.LogLevels.Debug);
+
+            string lockFilePath = Path.Combine(SelectedFolder, LOCK_FILENAME);
+            if (!File.Exists(lockFilePath))
+            {
+                Logger.Instance.Write("No lock file found...", Logger.LogLevels.Error);
+                return;
+            }
+            else
+            {
+                File.Delete(lockFilePath);
+            }
+        }
+
+        /// <summary>
         /// Sync the selection with the save in the folder
         /// </summary>
         private void UpdateFromSave()
@@ -402,6 +463,7 @@ namespace PictureSorter
             if (!Directory.Exists(directoryPath))
                 return;
 
+            UnloadFolder();
             Logger.Instance.Write($"Loading directory '{directoryPath}'");
 
             SelectedFolder = directoryPath;
@@ -446,6 +508,7 @@ namespace PictureSorter
 
             UpdateFromSave(); // Update selection from save
             SaveToFile(); // Save. Maybe more images, maybe no save yet
+            LockFolder();
 
             Logger.Instance.Write($"Processing missing DateTimeTaken...");
             frmProcessing frm = new frmProcessing();
@@ -695,7 +758,7 @@ namespace PictureSorter
             GC.Collect();
 
             // Save
-            SaveToFile(true);
+            SaveToFile(backup: true);
         }
 
         /// <summary>
@@ -714,7 +777,7 @@ namespace PictureSorter
             GC.Collect();
 
             // Save
-            SaveToFile(true);
+            SaveToFile(backup: true);
         }
 
         /// <summary>
