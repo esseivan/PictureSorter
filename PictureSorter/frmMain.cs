@@ -20,7 +20,8 @@ namespace PictureSorter
 {
     public partial class frmMain : Form
     {
-        private const bool INDENT_SAVE_FILE = false;
+        private bool INDENT_SAVE_FILE => AppSettingsManager.Instance.IndentSaveFile;
+        private bool HIDE_SAVE_FILE => AppSettingsManager.Instance.HideSaveFile;
 
         /// <summary>
         /// Keep track of the images informations in the selected directory
@@ -258,7 +259,7 @@ namespace PictureSorter
                     ? SettingsManager.BackupMode.dotBak
                     : SettingsManager.BackupMode.None,
                 indent: INDENT_SAVE_FILE,
-                hide: true,
+                hide: HIDE_SAVE_FILE,
                 zipFile: false
             );
 
@@ -583,7 +584,7 @@ namespace PictureSorter
                 exportedImages,
                 backup: SettingsManager.BackupMode.dotBak,
                 indent: INDENT_SAVE_FILE,
-                hide: true,
+                hide: HIDE_SAVE_FILE,
                 zipFile: false
             );
 
