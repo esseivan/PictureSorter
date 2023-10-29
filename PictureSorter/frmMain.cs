@@ -25,6 +25,8 @@ namespace PictureSorter
 
         private string LOCK_FILENAME => "psorter.lock";
 
+        private readonly string RUNTIME_ID;
+
         /// <summary>
         /// Keep track of the images informations in the selected directory
         /// </summary>
@@ -65,6 +67,11 @@ namespace PictureSorter
         /// The currently selected folder
         /// </summary>
         public string SelectedFolder = string.Empty;
+
+        /// <summary>
+        /// Path to the current lock file
+        /// </summary>
+        private string lockFilePath = string.Empty;
 
         /// <summary>
         /// Define wether the form is initialised
@@ -120,6 +127,10 @@ namespace PictureSorter
 
             InitializeComponent();
 
+            // Generate random ID for this instance. Used for lock file
+            Random rnd = new Random();
+            RUNTIME_ID = rnd.Next().ToString();
+
             Logger appLogger = new Logger
             {
                 FilePath = Logger.GetDefaultLogPath("ESN", "PictureSorter", "log.txt"),
@@ -136,6 +147,7 @@ namespace PictureSorter
                 );
             }
             appLogger.Write("Application ready !", Logger.LogLevels.Info);
+            appLogger.Write($"Runtime ID : {RUNTIME_ID}", Logger.LogLevels.Info);
 
             IsFormInitialised = true;
 
@@ -250,6 +262,12 @@ namespace PictureSorter
             if (imageInfoCache.Count == 0)
                 return;
 
+            // Validate lock file
+            if (!ValidateLockFile())
+            {
+                return;
+            }
+
             string savePath = Path.Combine(SelectedFolder, saveFileName);
             if (File.Exists(savePath))
                 File.SetAttributes(savePath, FileAttributes.Normal);
@@ -270,12 +288,73 @@ namespace PictureSorter
         }
 
         /// <summary>
+        /// Verify that the current lockfile is the one that this instance created
+        /// </summary>
+        /// <returns>True if valid</returns>
+        private bool ValidateLockFile()
+        {
+            try
+            {
+                string lockfileID = File.ReadAllText(lockFilePath);
+                if (string.Equals(lockfileID, RUNTIME_ID))
+                {
+                    return true;
+                }
+                else
+                {
+                    Logger.Instance.Write(
+                        "Lock file validation unsucessfull... Folder open in another application",
+                        Logger.LogLevels.Warn
+                    );
+
+                    DialogResult result = MessageBox.Show(
+                        "This folder has been open in another application. Please verify that the application is not already open. To ensure no data will be lost from your future progress, this application will close...\nPress OK to exit...",
+                        "Warning",
+                        MessageBoxButtons.OKCancel,
+                        MessageBoxIcon.Warning
+                    );
+                    if (result == DialogResult.OK)
+                    {
+                        this.Close();
+                    }
+
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Write("Unable to create lock file...", Logger.LogLevels.Fatal);
+                Logger.Instance.Write(ex.Message, Logger.LogLevels.Fatal);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Create the lock file
+        /// </summary>
+        /// <returns>True if success</returns>
+        private bool _createLockFile()
+        {
+            try
+            {
+                File.WriteAllText(lockFilePath, RUNTIME_ID);
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Write("Unable to create lock file...", Logger.LogLevels.Fatal);
+                Logger.Instance.Write(ex.Message, Logger.LogLevels.Fatal);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
         /// Try to lock the folder by creating a .lock file. If already present, ask the user
         /// </summary>
         /// <returns>If the folder can be open (no lock file present or user forced)</returns>
         private bool LockFolder()
         {
-            string lockFilePath = Path.Combine(SelectedFolder, LOCK_FILENAME);
+            Logger.Instance.Write("Locking folder...");
             if (File.Exists(lockFilePath))
             {
                 Logger.Instance.Write("Lock file already present...", Logger.LogLevels.Warn);
@@ -293,14 +372,11 @@ namespace PictureSorter
                     return false;
                 }
 
-                // Indicate available
-                return true;
+                // User took control of this folder
             }
-            else
-            {
-                File.Create(lockFilePath).Dispose();
-                return true;
-            }
+
+            _createLockFile();
+            return true;
         }
 
         /// <summary>
@@ -467,6 +543,8 @@ namespace PictureSorter
             Logger.Instance.Write($"Loading directory '{directoryPath}'");
 
             SelectedFolder = directoryPath;
+            lockFilePath = Path.Combine(SelectedFolder, LOCK_FILENAME);
+            LockFolder();
 
             cacheManager.Clear();
             imageInfoCache.Clear();
@@ -508,7 +586,6 @@ namespace PictureSorter
 
             UpdateFromSave(); // Update selection from save
             SaveToFile(); // Save. Maybe more images, maybe no save yet
-            LockFolder();
 
             Logger.Instance.Write($"Processing missing DateTimeTaken...");
             frmProcessing frm = new frmProcessing();
@@ -882,6 +959,12 @@ namespace PictureSorter
         private void englishToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ChangeLanguage("en");
+        }
+
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Logger.Instance.Write("Application Closing...");
+            UnloadFolder();
         }
 
         #endregion
