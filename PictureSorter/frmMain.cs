@@ -23,9 +23,11 @@ namespace PictureSorter
         private bool INDENT_SAVE_FILE => AppSettingsManager.Instance.IndentSaveFile;
         private bool HIDE_SAVE_FILE => AppSettingsManager.Instance.HideSaveFile;
 
-        private string LOCK_FILENAME => "psorter.lock";
+        private string LOCK_FILENAME => ".psorter.lock";
 
         private readonly string RUNTIME_ID;
+
+        private Stream _lockfileStream = null;
 
         /// <summary>
         /// Keep track of the images informations in the selected directory
@@ -262,12 +264,6 @@ namespace PictureSorter
             if (imageInfoCache.Count == 0)
                 return;
 
-            // Validate lock file
-            if (!ValidateLockFile())
-            {
-                return;
-            }
-
             string savePath = Path.Combine(SelectedFolder, saveFileName);
             if (File.Exists(savePath))
                 File.SetAttributes(savePath, FileAttributes.Normal);
@@ -288,48 +284,6 @@ namespace PictureSorter
         }
 
         /// <summary>
-        /// Verify that the current lockfile is the one that this instance created
-        /// </summary>
-        /// <returns>True if valid</returns>
-        private bool ValidateLockFile()
-        {
-            try
-            {
-                string lockfileID = File.ReadAllText(lockFilePath);
-                if (string.Equals(lockfileID, RUNTIME_ID))
-                {
-                    return true;
-                }
-                else
-                {
-                    Logger.Instance.Write(
-                        "Lock file validation unsucessfull... Folder open in another application",
-                        Logger.LogLevels.Warn
-                    );
-
-                    DialogResult result = MessageBox.Show(
-                        "This folder has been open in another application. Please verify that the application is not already open. To ensure no data will be lost from your future progress, this application will close...\nPress OK to exit...",
-                        "Warning",
-                        MessageBoxButtons.OKCancel,
-                        MessageBoxIcon.Warning
-                    );
-                    if (result == DialogResult.OK)
-                    {
-                        this.Close();
-                    }
-
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Instance.Write("Unable to create lock file...", Logger.LogLevels.Fatal);
-                Logger.Instance.Write(ex.Message, Logger.LogLevels.Fatal);
-                return false;
-            }
-        }
-
-        /// <summary>
         /// Create the lock file
         /// </summary>
         /// <returns>True if success</returns>
@@ -338,6 +292,8 @@ namespace PictureSorter
             try
             {
                 File.WriteAllText(lockFilePath, RUNTIME_ID);
+                File.SetAttributes(lockFilePath, FileAttributes.Hidden);
+                _lockfileStream = File.Open(lockFilePath, FileMode.Open);
             }
             catch (Exception ex)
             {
@@ -372,18 +328,38 @@ namespace PictureSorter
                     return false;
                 }
 
-                // User took control of this folder
+                // User want to try and take control of the folder
+                try
+                {
+                    File.Delete(lockFilePath);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.Write("Failed to delete lock file...", Logger.LogLevels.Error);
+                    Logger.Instance.Write(ex.Message, Logger.LogLevels.Error);
+                    MessageBox.Show(
+                        Properties.strings.errorLockDeleteFailed,
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                    return false;
+                }
             }
 
-            _createLockFile();
-            return true;
+            return _createLockFile();
         }
 
         /// <summary>
         /// Unload and unlock current folder
         /// </summary>
-        private void UnloadFolder()
+        private void UnlockFolder()
         {
+            if (_lockfileStream == null)
+            {
+                return;
+            }
+
             // Invalid or no selected folder
             if (!Directory.Exists(SelectedFolder))
             {
@@ -400,6 +376,8 @@ namespace PictureSorter
             }
             else
             {
+                _lockfileStream.Dispose();
+                _lockfileStream = null;
                 File.Delete(lockFilePath);
             }
         }
@@ -431,6 +409,7 @@ namespace PictureSorter
             catch (Exception ex)
             {
                 Logger.Instance.Write("Failed to load progress...", Logger.LogLevels.Error);
+                Logger.Instance.Write(ex.Message, Logger.LogLevels.Error);
                 MessageBox.Show(
                     "Error loading progress : \n" + ex.Message,
                     "Error",
@@ -531,6 +510,19 @@ namespace PictureSorter
         }
 
         /// <summary>
+        /// Close the current folder
+        /// </summary>
+        private void CloseFolder()
+        {
+            UnlockFolder();
+
+            cacheManager.Clear();
+            imageInfoCache.Clear();
+            imageInfoIndices.Clear();
+            treeView1.Nodes.Clear();
+        }
+
+        /// <summary>
         /// Load images from the specified directory
         /// </summary>
         /// <param name="directoryPath"></param>
@@ -539,17 +531,17 @@ namespace PictureSorter
             if (!Directory.Exists(directoryPath))
                 return;
 
-            UnloadFolder();
+            CloseFolder();
             Logger.Instance.Write($"Loading directory '{directoryPath}'");
 
             SelectedFolder = directoryPath;
             lockFilePath = Path.Combine(SelectedFolder, LOCK_FILENAME);
-            LockFolder();
-
-            cacheManager.Clear();
-            imageInfoCache.Clear();
-            imageInfoIndices.Clear();
-            treeView1.Nodes.Clear();
+            if (!LockFolder())
+            {
+                SelectedFolder = string.Empty;
+                Logger.Instance.Write($"Couldn't lock folder. Folder not open");
+                return;
+            }
 
             List<string> imageFiles = new List<string>();
             foreach (string filter in filters)
@@ -964,7 +956,7 @@ namespace PictureSorter
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             Logger.Instance.Write("Application Closing...");
-            UnloadFolder();
+            UnlockFolder();
         }
 
         #endregion

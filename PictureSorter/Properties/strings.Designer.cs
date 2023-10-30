@@ -61,6 +61,15 @@ namespace PictureSorter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to open the folder... Another application must have this folder loaded..
+        /// </summary>
+        internal static string errorLockDeleteFailed {
+            get {
+                return ResourceManager.GetString("errorLockDeleteFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Error.
         /// </summary>
         internal static string ErrorStr {
