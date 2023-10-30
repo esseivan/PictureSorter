@@ -20,7 +20,14 @@ namespace PictureSorter
 {
     public partial class frmMain : Form
     {
-        private const bool INDENT_SAVE_FILE = false;
+        private bool INDENT_SAVE_FILE => AppSettingsManager.Instance.IndentSaveFile;
+        private bool HIDE_SAVE_FILE => AppSettingsManager.Instance.HideSaveFile;
+
+        private string LOCK_FILENAME => ".psorter.lock";
+
+        private readonly string RUNTIME_ID;
+
+        private Stream _lockfileStream = null;
 
         /// <summary>
         /// Keep track of the images informations in the selected directory
@@ -62,6 +69,11 @@ namespace PictureSorter
         /// The currently selected folder
         /// </summary>
         public string SelectedFolder = string.Empty;
+
+        /// <summary>
+        /// Path to the current lock file
+        /// </summary>
+        private string lockFilePath = string.Empty;
 
         /// <summary>
         /// Define wether the form is initialised
@@ -117,6 +129,10 @@ namespace PictureSorter
 
             InitializeComponent();
 
+            // Generate random ID for this instance. Used for lock file
+            Random rnd = new Random();
+            RUNTIME_ID = rnd.Next().ToString();
+
             Logger appLogger = new Logger
             {
                 FilePath = Logger.GetDefaultLogPath("ESN", "PictureSorter", "log.txt"),
@@ -133,6 +149,7 @@ namespace PictureSorter
                 );
             }
             appLogger.Write("Application ready !", Logger.LogLevels.Info);
+            appLogger.Write($"Runtime ID : {RUNTIME_ID}", Logger.LogLevels.Info);
 
             IsFormInitialised = true;
 
@@ -258,12 +275,111 @@ namespace PictureSorter
                     ? SettingsManager.BackupMode.dotBak
                     : SettingsManager.BackupMode.None,
                 indent: INDENT_SAVE_FILE,
-                hide: true,
+                hide: HIDE_SAVE_FILE,
                 zipFile: false
             );
 
             Logger.Instance.Write($"Progres saved to '${savePath}'");
             Console.WriteLine("Saved !");
+        }
+
+        /// <summary>
+        /// Create the lock file
+        /// </summary>
+        /// <returns>True if success</returns>
+        private bool _createLockFile()
+        {
+            try
+            {
+                File.WriteAllText(lockFilePath, RUNTIME_ID);
+                File.SetAttributes(lockFilePath, FileAttributes.Hidden);
+                _lockfileStream = File.Open(lockFilePath, FileMode.Open);
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.Write("Unable to create lock file...", Logger.LogLevels.Fatal);
+                Logger.Instance.Write(ex.Message, Logger.LogLevels.Fatal);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Try to lock the folder by creating a .lock file. If already present, ask the user
+        /// </summary>
+        /// <returns>If the folder can be open (no lock file present or user forced)</returns>
+        private bool LockFolder()
+        {
+            Logger.Instance.Write("Locking folder...");
+            if (File.Exists(lockFilePath))
+            {
+                Logger.Instance.Write("Lock file already present...", Logger.LogLevels.Warn);
+                // Already open from another app, or not properly exited the app
+                // So asking the user if he want to open anyway
+                DialogResult result = MessageBox.Show(
+                    Properties.strings.warningLockedStr,
+                    "Warning",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Warning
+                );
+                if (result != DialogResult.Yes)
+                {
+                    // Indicate not available
+                    return false;
+                }
+
+                // User want to try and take control of the folder
+                try
+                {
+                    File.Delete(lockFilePath);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.Write("Failed to delete lock file...", Logger.LogLevels.Error);
+                    Logger.Instance.Write(ex.Message, Logger.LogLevels.Error);
+                    MessageBox.Show(
+                        Properties.strings.errorLockDeleteFailed,
+                        "Error",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                    return false;
+                }
+            }
+
+            return _createLockFile();
+        }
+
+        /// <summary>
+        /// Unload and unlock current folder
+        /// </summary>
+        private void UnlockFolder()
+        {
+            if (_lockfileStream == null)
+            {
+                return;
+            }
+
+            // Invalid or no selected folder
+            if (!Directory.Exists(SelectedFolder))
+            {
+                return;
+            }
+
+            Logger.Instance.Write("Unlocking folder...", Logger.LogLevels.Debug);
+
+            string lockFilePath = Path.Combine(SelectedFolder, LOCK_FILENAME);
+            if (!File.Exists(lockFilePath))
+            {
+                Logger.Instance.Write("No lock file found...", Logger.LogLevels.Error);
+                return;
+            }
+            else
+            {
+                _lockfileStream.Dispose();
+                _lockfileStream = null;
+                File.Delete(lockFilePath);
+            }
         }
 
         /// <summary>
@@ -293,6 +409,7 @@ namespace PictureSorter
             catch (Exception ex)
             {
                 Logger.Instance.Write("Failed to load progress...", Logger.LogLevels.Error);
+                Logger.Instance.Write(ex.Message, Logger.LogLevels.Error);
                 MessageBox.Show(
                     "Error loading progress : \n" + ex.Message,
                     "Error",
@@ -393,6 +510,19 @@ namespace PictureSorter
         }
 
         /// <summary>
+        /// Close the current folder
+        /// </summary>
+        private void CloseFolder()
+        {
+            UnlockFolder();
+
+            cacheManager.Clear();
+            imageInfoCache.Clear();
+            imageInfoIndices.Clear();
+            treeView1.Nodes.Clear();
+        }
+
+        /// <summary>
         /// Load images from the specified directory
         /// </summary>
         /// <param name="directoryPath"></param>
@@ -401,14 +531,17 @@ namespace PictureSorter
             if (!Directory.Exists(directoryPath))
                 return;
 
+            CloseFolder();
             Logger.Instance.Write($"Loading directory '{directoryPath}'");
 
             SelectedFolder = directoryPath;
-
-            cacheManager.Clear();
-            imageInfoCache.Clear();
-            imageInfoIndices.Clear();
-            treeView1.Nodes.Clear();
+            lockFilePath = Path.Combine(SelectedFolder, LOCK_FILENAME);
+            if (!LockFolder())
+            {
+                SelectedFolder = string.Empty;
+                Logger.Instance.Write($"Couldn't lock folder. Folder not open");
+                return;
+            }
 
             List<string> imageFiles = new List<string>();
             foreach (string filter in filters)
@@ -448,10 +581,13 @@ namespace PictureSorter
 
             Logger.Instance.Write($"Processing missing DateTimeTaken...");
             frmProcessing frm = new frmProcessing();
+            frm.SetText(Properties.strings.txtProcessingLoading);
             frm.Show();
             Application.DoEvents();
             Cursor.Current = Cursors.WaitCursor;
             // Update missing dateTimeTaken infos
+            int ctr = 0;
+            int max = imageInfoCache.Count;
             foreach (var item in imageInfoCache)
             {
                 if (item.Value.DateTimeTaken == DateTime.MinValue)
@@ -470,6 +606,8 @@ namespace PictureSorter
                         );
                     }
                 }
+                ctr++;
+                frm.SetCounter(ctr, max);
             }
 
             frm.Close();
@@ -563,7 +701,14 @@ namespace PictureSorter
             Logger.Instance.Write($"Saving to '{folderSavePath}'");
             Console.WriteLine($"Saving to '{folderSavePath}'");
 
+            Cursor.Current = Cursors.WaitCursor;
+            frmProcessing frm = new frmProcessing();
+            frm.SetText(Properties.strings.txtProcessingExport);
+            frm.Show();
+
             Dictionary<string, ImageInfo> exportedImages = new Dictionary<string, ImageInfo>();
+            int ctr = 0;
+            int max = selectedImages.Count();
             foreach (var file in selectedImages)
             {
                 string srcPath = Path.Combine(SelectedFolder, file.Key);
@@ -571,6 +716,9 @@ namespace PictureSorter
                 File.Copy(srcPath, destPath, false);
                 // Also copy image info dateTime
                 exportedImages.Add(file.Key, file.Value);
+
+                ctr++;
+                frm.SetCounter(ctr, max);
             }
 
             // Save the exportedImages informations
@@ -583,9 +731,11 @@ namespace PictureSorter
                 exportedImages,
                 backup: SettingsManager.BackupMode.dotBak,
                 indent: INDENT_SAVE_FILE,
-                hide: true,
+                hide: HIDE_SAVE_FILE,
                 zipFile: false
             );
+
+            Cursor.Current = Cursors.Default;
 
             Logger.Instance.Write($"Progres saved to '${savePath}'");
             Console.WriteLine("Saved !");
@@ -694,7 +844,7 @@ namespace PictureSorter
             GC.Collect();
 
             // Save
-            SaveToFile(true);
+            SaveToFile(backup: true);
         }
 
         /// <summary>
@@ -713,7 +863,7 @@ namespace PictureSorter
             GC.Collect();
 
             // Save
-            SaveToFile(true);
+            SaveToFile(backup: true);
         }
 
         /// <summary>
@@ -818,6 +968,12 @@ namespace PictureSorter
         private void englishToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ChangeLanguage("en");
+        }
+
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Logger.Instance.Write("Application Closing...");
+            UnlockFolder();
         }
 
         #endregion

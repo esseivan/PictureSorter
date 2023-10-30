@@ -26,5 +26,15 @@
         /// Whether to open the recently exported folder in the application. This is usefull for chaining sorting
         /// </summary>
         public bool OpenFolderInAppAfterExport { get; set; } = true;
+
+        /// <summary>
+        /// Indent the text inside the save file
+        /// </summary>
+        public bool IndentSaveFile { get; set; } = true;
+
+        /// <summary>
+        /// Hide the save file
+        /// </summary>
+        public bool HideSaveFile { get; set; } = false;
     }
 }

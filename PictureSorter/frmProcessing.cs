@@ -16,5 +16,18 @@ namespace PictureSorter
         {
             InitializeComponent();
         }
+
+        public void SetText(string text)
+        {
+            label1.Text = text;
+        }
+
+        public void SetCounter(int current, int max)
+        {
+            lblCounter.Text = $"{current}/{max}";
+            int percentage = Math.Min(100, 100 * current / max);
+            progressBar1.Value = percentage;
+            Application.DoEvents();
+        }
     }
 }

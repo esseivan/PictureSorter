@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="errorLockDeleteFailed" xml:space="preserve">
+    <value>Erreur lors de l'ouverture du dossier. Il doit déjà être ouvert dans une autre fenêtre.</value>
+  </data>
   <data name="ErrorStr" xml:space="preserve">
     <value>Erreur</value>
   </data>
@@ -138,5 +141,21 @@
   </data>
   <data name="sortStr" xml:space="preserve">
     <value>tri</value>
+  </data>
+  <data name="txtProcessingExport" xml:space="preserve">
+    <value>Exportation des images...
+
+Cette fenêtre va se fermer toute seule...</value>
+  </data>
+  <data name="txtProcessingLoading" xml:space="preserve">
+    <value>Ouverture du dossier...
+Pour la première ouverture, le tri des fichier doit être fait.
+Cela peut prendre un certain moment, merci de patienter...
+
+Cette fenêtre va se fermer toute seule...</value>
+  </data>
+  <data name="warningLockedStr" xml:space="preserve">
+    <value>Ce dossier est déjà ouvert dans une autre fenêtre de l'application. Vérifier que cette application est lancée une seule fois (une seule fenêtre).
+Ouvrir tout de même le dossier ?</value>
   </data>
 </root>
