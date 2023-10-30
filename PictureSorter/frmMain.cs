@@ -581,10 +581,13 @@ namespace PictureSorter
 
             Logger.Instance.Write($"Processing missing DateTimeTaken...");
             frmProcessing frm = new frmProcessing();
+            frm.SetText(Properties.strings.txtProcessingLoading);
             frm.Show();
             Application.DoEvents();
             Cursor.Current = Cursors.WaitCursor;
             // Update missing dateTimeTaken infos
+            int ctr = 0;
+            int max = imageInfoCache.Count;
             foreach (var item in imageInfoCache)
             {
                 if (item.Value.DateTimeTaken == DateTime.MinValue)
@@ -603,6 +606,8 @@ namespace PictureSorter
                         );
                     }
                 }
+                ctr++;
+                frm.SetCounter(ctr, max);
             }
 
             frm.Close();
@@ -696,7 +701,14 @@ namespace PictureSorter
             Logger.Instance.Write($"Saving to '{folderSavePath}'");
             Console.WriteLine($"Saving to '{folderSavePath}'");
 
+            Cursor.Current = Cursors.WaitCursor;
+            frmProcessing frm = new frmProcessing();
+            frm.SetText(Properties.strings.txtProcessingExport);
+            frm.Show();
+
             Dictionary<string, ImageInfo> exportedImages = new Dictionary<string, ImageInfo>();
+            int ctr = 0;
+            int max = selectedImages.Count();
             foreach (var file in selectedImages)
             {
                 string srcPath = Path.Combine(SelectedFolder, file.Key);
@@ -704,6 +716,9 @@ namespace PictureSorter
                 File.Copy(srcPath, destPath, false);
                 // Also copy image info dateTime
                 exportedImages.Add(file.Key, file.Value);
+
+                ctr++;
+                frm.SetCounter(ctr, max);
             }
 
             // Save the exportedImages informations
@@ -719,6 +734,8 @@ namespace PictureSorter
                 hide: HIDE_SAVE_FILE,
                 zipFile: false
             );
+
+            Cursor.Current = Cursors.Default;
 
             Logger.Instance.Write($"Progres saved to '${savePath}'");
             Console.WriteLine("Saved !");

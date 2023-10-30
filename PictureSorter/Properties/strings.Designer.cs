@@ -128,6 +128,29 @@ namespace PictureSorter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Exporting images...
+        ///
+        ///This window will automatically close itself....
+        /// </summary>
+        internal static string txtProcessingExport {
+            get {
+                return ResourceManager.GetString("txtProcessingExport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Openning folder...
+        ///The first time, file metadata is retrieved. This may take a while. Please wait...
+        ///
+        ///This window will automatically close itself....
+        /// </summary>
+        internal static string txtProcessingLoading {
+            get {
+                return ResourceManager.GetString("txtProcessingLoading", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This folder is already loaded in another instance of the application. Make sure that the application is not already open.
         ///Still open the folder ?.
         /// </summary>
