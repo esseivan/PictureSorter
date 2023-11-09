@@ -14,8 +14,8 @@ namespace PictureSorter
     {
         public frmProcessing()
         {
-            this.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             InitializeComponent();
+            this.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath);
         }
 
         public void SetText(string text)
