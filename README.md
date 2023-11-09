@@ -29,3 +29,8 @@ You can download the ClickOnce application (Windows) at https://esseivan.github.
 ## Build yourself
 
 Just open the solution in Visual Studio
+
+
+## Others
+
+Image from : <a href="https://www.flaticon.com/free-icons/picture" title="picture icons">Picture icons created by Freepik - Flaticon</a>
