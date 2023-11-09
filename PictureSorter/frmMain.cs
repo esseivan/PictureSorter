@@ -127,6 +127,8 @@ namespace PictureSorter
             // Set language before components init
             SetLanguage();
 
+            //this.Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+
             InitializeComponent();
 
             // Generate random ID for this instance. Used for lock file
@@ -161,7 +163,8 @@ namespace PictureSorter
         /// </summary>
         private void Form1_Shown(object sender, EventArgs e)
         {
-            ChooseFile();
+            //ChooseFile();
+            ChooseFolder();
         }
 
         /// <summary>
