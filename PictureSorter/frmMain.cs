@@ -385,6 +385,33 @@ namespace PictureSorter
             }
         }
 
+        private DateTime GetDateFromName(string name)
+        {
+            Regex regex = new Regex("^.*(\\d{8}.\\d{6}).*$");
+            Match result = regex.Match(name);
+            if (!result.Success)
+            {
+                return DateTime.MinValue;
+            }
+
+            // Parse
+            string dateTimeStr = result.Groups[1].Value;
+            dateTimeStr = dateTimeStr.Remove(8, 1);
+            bool success = DateTime.TryParseExact(
+                dateTimeStr,
+                "yyyyMMddHHmmss",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out DateTime date
+            );
+            if (!success)
+            {
+                return DateTime.MinValue;
+            }
+
+            return date;
+        }
+
         /// <summary>
         /// Sync the selection with the save in the folder
         /// </summary>
@@ -437,6 +464,12 @@ namespace PictureSorter
         #endregion
 
         #region Image management
+
+        private void RenameImages()
+        {
+            // Exporter et renommer les images
+            ExportAndRenameSelectedImages();
+        }
 
         private DateTime GetJpegDate(string filePath)
         {
@@ -598,6 +631,8 @@ namespace PictureSorter
                     try
                     {
                         DateTime dt = GetJpegDate(item.Value.FullPath);
+                        if (dt == DateTime.MinValue)
+                            dt = GetDateFromName(Path.GetFileName(item.Value.FullPath));
                         item.Value.DateTimeTaken = dt;
                     }
                     catch (Exception ex)
@@ -754,6 +789,127 @@ namespace PictureSorter
             }
         }
 
+        /// <summary>
+        /// Export the selected images into a predefined folder
+        /// </summary>
+        private void ExportAndRenameSelectedImages()
+        {
+            var selectedImages = imageInfoCache.Where((x) => x.Value.IsSelected);
+
+            if (0 == selectedImages.Count())
+            {
+                MessageBox.Show(
+                    Properties.strings.NoPictureCheckedErrorStr,
+                    Properties.strings.ErrorStr,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                return;
+            }
+            Logger.Instance.Write($"Exporting {selectedImages.Count()} images...");
+
+            string directoryName = Path.GetFileName(SelectedFolder);
+            // Check if current directory match the sortStr
+            Regex matchSortStr = new Regex("^(.*)( tri [1-9][0-9]*)$");
+            Match result = matchSortStr.Match(SelectedFolder);
+            if (result.Success)
+            {
+                // When it does, remove that part from the output directory.
+                // That correspond to keeping the group1 (the "(.*)" from the regex)
+                directoryName = result.Groups[1].Value;
+            }
+            string folderSavePath = Path.Combine(
+                Path.GetDirectoryName(SelectedFolder),
+                directoryName + $" {Properties.strings.sortStr} "
+            );
+
+            int counter = 1;
+            while (Directory.Exists(folderSavePath + counter))
+            {
+                counter++;
+            }
+            folderSavePath += counter;
+            Directory.CreateDirectory(folderSavePath);
+            Logger.Instance.Write($"Folder choosen : {folderSavePath}");
+
+            Logger.Instance.Write($"Saving to '{folderSavePath}'");
+            Console.WriteLine($"Saving to '{folderSavePath}'");
+
+            Cursor.Current = Cursors.WaitCursor;
+            frmProcessing frm = new frmProcessing();
+            frm.SetText(Properties.strings.txtProcessingExport);
+            frm.Show();
+
+            Dictionary<string, ImageInfo> exportedImages = new Dictionary<string, ImageInfo>();
+            int ctr = 0;
+            int max = selectedImages.Count();
+            foreach (var file in selectedImages)
+            {
+                string newFileName = file.Key;
+                if (file.Value.DateTimeTaken != DateTime.MinValue)
+                {
+                    // Datetime available. Rename
+                    newFileName =
+                        $"img_{file.Value.DateTimeTaken.ToString("yyyyMMdd_HHmmss")}{Path.GetExtension(file.Key)}";
+                }
+                else
+                {
+                    newFileName = "__" + newFileName;
+                }
+                string srcPath = Path.Combine(SelectedFolder, file.Key);
+                string destPath_base = Path.Combine(folderSavePath, newFileName);
+                // While file exists, increment a counter
+                int i = 0;
+                string ext = Path.GetExtension(destPath_base);
+                string destPath = destPath_base;
+                while (File.Exists(destPath))
+                {
+                    i++;
+                    destPath = Path.Combine(
+                        folderSavePath,
+                        $"{Path.GetFileNameWithoutExtension(destPath_base)}_{i}{ext}"
+                    );
+                }
+                File.Copy(srcPath, destPath, false);
+                string acceptedFileName = Path.GetFileName(destPath);
+                // Also copy image info dateTime
+                if (!exportedImages.ContainsKey(acceptedFileName))
+                    exportedImages.Add(acceptedFileName, file.Value);
+
+                ctr++;
+                frm.SetCounter(ctr, max);
+            }
+
+            // Save the exportedImages informations
+            string savePath = Path.Combine(folderSavePath, saveFileName);
+            if (File.Exists(savePath))
+                File.SetAttributes(savePath, FileAttributes.Normal);
+
+            SettingsManager.SaveTo(
+                savePath,
+                exportedImages,
+                backup: SettingsManager.BackupMode.dotBak,
+                indent: INDENT_SAVE_FILE,
+                hide: HIDE_SAVE_FILE,
+                zipFile: false
+            );
+
+            frm.Close();
+            Cursor.Current = Cursors.Default;
+
+            Logger.Instance.Write($"Progres saved to '${savePath}'");
+            Console.WriteLine("Saved !");
+
+            Logger.Instance.Write("Exporting complete !");
+            Process.Start(folderSavePath);
+
+            if (AppSettingsManager.Instance.OpenFolderInAppAfterExport)
+            {
+                Logger.Instance.Write("Openning new folder just after export...");
+                LoadImages(folderSavePath);
+            }
+        }
+
         #endregion
 
         #region Cache management
@@ -809,6 +965,14 @@ namespace PictureSorter
         #endregion
 
         #region Events
+
+        /// <summary>
+        /// Renommer les images en fonction de la date où elles ont été prises
+        /// </summary>
+        private void renommerLesImagesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RenameImages();
+        }
 
         /// <summary>
         /// Quitter

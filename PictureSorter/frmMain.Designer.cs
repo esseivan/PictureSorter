@@ -56,6 +56,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.lblImageCounter = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
+            this.renommerLesImagesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -96,7 +97,6 @@
             // 
             // menuStrip1
             // 
-            this.menuStrip1.GripMargin = new System.Windows.Forms.Padding(2, 2, 0, 2);
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fichierToolStripMenuItem,
@@ -114,6 +114,7 @@
             this.ouvrirDossierToolStripMenuItem,
             this.toolStripSeparator2,
             this.exporterLesImaesToolStripMenuItem,
+            this.renommerLesImagesToolStripMenuItem,
             this.toolStripSeparator1,
             this.quitterToolStripMenuItem});
             this.fichierToolStripMenuItem.Name = "fichierToolStripMenuItem";
@@ -258,6 +259,12 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // renommerLesImagesToolStripMenuItem
+            // 
+            this.renommerLesImagesToolStripMenuItem.Name = "renommerLesImagesToolStripMenuItem";
+            resources.ApplyResources(this.renommerLesImagesToolStripMenuItem, "renommerLesImagesToolStripMenuItem");
+            this.renommerLesImagesToolStripMenuItem.Click += new System.EventHandler(this.renommerLesImagesToolStripMenuItem_Click);
+            // 
             // frmMain
             // 
             resources.ApplyResources(this, "$this");
@@ -314,6 +321,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.Label lblImageCounter;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ToolStripMenuItem renommerLesImagesToolStripMenuItem;
     }
 }
 
