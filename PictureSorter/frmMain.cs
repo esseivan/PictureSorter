@@ -738,6 +738,7 @@ namespace PictureSorter
                 zipFile: false
             );
 
+            frm.Close();
             Cursor.Current = Cursors.Default;
 
             Logger.Instance.Write($"Progres saved to '${savePath}'");
