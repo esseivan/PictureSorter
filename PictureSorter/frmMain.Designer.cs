@@ -39,6 +39,7 @@
             this.ouvrirDossierToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.exporterLesImaesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.renameExportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.quitterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.généralToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -56,7 +57,8 @@
             this.label1 = new System.Windows.Forms.Label();
             this.lblImageCounter = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
-            this.renommerLesImagesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.renameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -114,7 +116,9 @@
             this.ouvrirDossierToolStripMenuItem,
             this.toolStripSeparator2,
             this.exporterLesImaesToolStripMenuItem,
-            this.renommerLesImagesToolStripMenuItem,
+            this.renameExportToolStripMenuItem,
+            this.toolStripSeparator4,
+            this.renameToolStripMenuItem,
             this.toolStripSeparator1,
             this.quitterToolStripMenuItem});
             this.fichierToolStripMenuItem.Name = "fichierToolStripMenuItem";
@@ -148,6 +152,12 @@
             this.exporterLesImaesToolStripMenuItem.Name = "exporterLesImaesToolStripMenuItem";
             resources.ApplyResources(this.exporterLesImaesToolStripMenuItem, "exporterLesImaesToolStripMenuItem");
             this.exporterLesImaesToolStripMenuItem.Click += new System.EventHandler(this.exporterLesImaesToolStripMenuItem_Click);
+            // 
+            // renameExportToolStripMenuItem
+            // 
+            this.renameExportToolStripMenuItem.Name = "renameExportToolStripMenuItem";
+            resources.ApplyResources(this.renameExportToolStripMenuItem, "renameExportToolStripMenuItem");
+            this.renameExportToolStripMenuItem.Click += new System.EventHandler(this.renameExportToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
@@ -259,11 +269,15 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // renommerLesImagesToolStripMenuItem
+            // renameToolStripMenuItem
             // 
-            this.renommerLesImagesToolStripMenuItem.Name = "renommerLesImagesToolStripMenuItem";
-            resources.ApplyResources(this.renommerLesImagesToolStripMenuItem, "renommerLesImagesToolStripMenuItem");
-            this.renommerLesImagesToolStripMenuItem.Click += new System.EventHandler(this.renommerLesImagesToolStripMenuItem_Click);
+            this.renameToolStripMenuItem.Name = "renameToolStripMenuItem";
+            resources.ApplyResources(this.renameToolStripMenuItem, "renameToolStripMenuItem");
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            resources.ApplyResources(this.toolStripSeparator4, "toolStripSeparator4");
             // 
             // frmMain
             // 
@@ -321,7 +335,9 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.Label lblImageCounter;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ToolStripMenuItem renommerLesImagesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem renameExportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem renameToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
     }
 }
 

@@ -15,6 +15,7 @@ using System.Drawing.Imaging;
 using System.Text;
 using System.Drawing;
 using System.Text.RegularExpressions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace PictureSorter
 {
@@ -61,7 +62,7 @@ namespace PictureSorter
         private string[] filters => AppSettingsManager.Instance.FileExtensionsFilter;
 
         /// <summary>
-        /// The name of the saved progress file
+        /// The name of the saved progress/config file
         /// </summary>
         private string saveFileName => AppSettingsManager.Instance.AppSaveFileName;
 
@@ -794,12 +795,24 @@ namespace PictureSorter
             }
         }
 
-        /// <summary>
-        /// Export the selected images into a predefined folder
-        /// </summary>
-        private void ExportAndRenameSelectedImages()
+        struct FileRenameSet
         {
-            var selectedImages = imageInfoCache.Where((x) => x.Value.IsSelected);
+            public readonly string src;
+            public readonly string dest;
+
+            public FileRenameSet(string src, string dest)
+            {
+                this.src = src;
+                this.dest = dest;
+            }
+        }
+
+        /// <summary>
+        /// Rename all the images, without creating a new folder. Confirmation must be asked prior
+        /// </summary>
+        private void RenameAllImages()
+        {
+            var selectedImages = GetAllImages();
 
             if (0 == selectedImages.Count())
             {
@@ -811,8 +824,91 @@ namespace PictureSorter
                 );
                 return;
             }
-            WriteLog($"Exporting {selectedImages.Count()} images...");
+            WriteLog($"Renaming {selectedImages.Count()} images...");
 
+            // Show processing... form
+            Cursor.Current = Cursors.WaitCursor;
+            frmProcessing frmProgress = new frmProcessing();
+            frmProgress.SetText(Properties.strings.txtProcessingExport);
+            frmProgress.Show();
+
+            // Information set for exported images. Image name may change, so need to create a new one
+            Dictionary<string, ImageInfo> newImageConfig = new Dictionary<string, ImageInfo>();
+            List<FileRenameSet> RenameList = new List<FileRenameSet>();
+            int ctr = 0;
+            int max = selectedImages.Count();
+            foreach (KeyValuePair<string, ImageInfo> file in selectedImages)
+            {
+                string srcFileName = Path.Combine(SelectedFolder, file.Key);
+                string destFileName = RenameFileFromDate(file);
+                string destPath = DetermineFileDestinationPathFromList(
+                    SelectedFolder,
+                    destFileName,
+                    RenameList
+                ); // Add suffix if necessary
+                FileRenameSet set = new FileRenameSet(srcFileName, destFileName);
+                RenameList.Add(set);
+
+                // Save to new config
+                string acceptedFinalFileName = Path.GetFileName(destPath); // The filename with eventual suffixes
+
+                // Also copy image info dateTime
+                if (!newImageConfig.ContainsKey(acceptedFinalFileName))
+                    newImageConfig.Add(acceptedFinalFileName, file.Value);
+                else
+                    WriteLog(
+                        $"Image key already present in save... '{acceptedFinalFileName}'",
+                        Logger.LogLevels.Error
+                    );
+            }
+
+            foreach (FileRenameSet renameSet in RenameList)
+            {
+                WriteLog($"Renaming {renameSet.src} to {renameSet.dest}...");
+                File.Move(renameSet.src, renameSet.dest);
+
+                // Progress counter
+                ctr++;
+                frmProgress.SetCounter(ctr, max);
+            }
+
+            // Save the exportedImages informations
+            string configSavePath = Path.Combine(SelectedFolder, saveFileName);
+            if (File.Exists(configSavePath))
+                File.SetAttributes(configSavePath, FileAttributes.Normal); // Need to unhide in order to delete/overwrite
+
+            SettingsManager.SaveTo(
+                configSavePath,
+                newImageConfig,
+                backup: SettingsManager.BackupMode.dotBak,
+                indent: INDENT_SAVE_FILE,
+                hide: HIDE_SAVE_FILE,
+                zipFile: false
+            );
+
+            frmProgress.Close();
+            Cursor.Current = Cursors.Default;
+
+            WriteLog($"Progres saved to '${configSavePath}'");
+            Console.WriteLine("Saved !");
+
+            WriteLog("Exporting complete !");
+            Process.Start(SelectedFolder);
+
+            if (AppSettingsManager.Instance.OpenFolderInAppAfterExport)
+            {
+                WriteLog("Openning new folder just after export...");
+                LoadImages(SelectedFolder);
+            }
+        }
+
+        private Dictionary<string, ImageInfo> GetAllImages() => imageInfoCache;
+
+        private IEnumerable<KeyValuePair<string, ImageInfo>> GetSelectedImages() =>
+            imageInfoCache.Where((x) => x.Value.IsSelected);
+
+        private string SelectTriFolder()
+        {
             string directoryName = Path.GetFileName(SelectedFolder);
             // Check if current directory match the sortStr
             Regex matchSortStr = new Regex("^(.*)( tri [1-9][0-9]*)$");
@@ -837,61 +933,139 @@ namespace PictureSorter
             Directory.CreateDirectory(folderSavePath);
             WriteLog($"Folder choosen : {folderSavePath}");
 
+            return folderSavePath;
+        }
+
+        private string RenameFileFromDate(KeyValuePair<string, ImageInfo> file)
+        {
+            string newFileName = file.Key;
+            if (file.Value.DateTimeTaken != DateTime.MinValue)
+            {
+                // Datetime available. Rename
+                newFileName =
+                    $"img_{file.Value.DateTimeTaken.ToString("yyyyMMdd_HHmmss")}{Path.GetExtension(file.Key)}";
+            }
+            else
+            {
+                // No dat found, add '__' prefix
+                newFileName = "__" + newFileName;
+            }
+
+            return newFileName;
+        }
+
+        /// <summary>
+        /// Given the bsae destination path, add an incrementing suffix if already existing.
+        /// Instead of checking from Hard Drive, check from a list
+        /// </summary>
+        /// <param name="fileName">The image filename</param>
+        /// <param name="destinationFolder">The destination folder of the image</param>
+        private string DetermineFileDestinationPathFromList(
+            string destinationFolder,
+            string fileName,
+            List<FileRenameSet> renameList
+        )
+        {
+            string ext = Path.GetExtension(fileName);
+            string destinationPath = fileName;
+            int i = 0;
+            var destPaths = renameList.Select((x) => x.dest);
+            while (destPaths.Contains(destinationPath))
+            {
+                i++;
+                destinationPath = Path.Combine(
+                    destinationFolder,
+                    $"{Path.GetFileNameWithoutExtension(fileName)}_{i}{ext}"
+                );
+            }
+
+            return destinationPath;
+        }
+
+        /// <summary>
+        /// Given the bsae destination path, add an incrementing suffix if already existing
+        /// </summary>
+        /// <param name="fileName">The image filename</param>
+        /// <param name="destinationFolder">The destination folder of the image</param>
+        private string DetermineFileDestinationPath(string destinationFolder, string fileName)
+        {
+            string ext = Path.GetExtension(fileName);
+            string destinationPath = fileName;
+            int i = 0;
+            while (File.Exists(destinationPath))
+            {
+                i++;
+                destinationPath = Path.Combine(
+                    destinationFolder,
+                    $"{Path.GetFileNameWithoutExtension(fileName)}_{i}{ext}"
+                );
+            }
+
+            return destinationPath;
+        }
+
+        /// <summary>
+        /// Export the selected images into a predefined folder
+        /// </summary>
+        private void ExportAndRenameSelectedImages()
+        {
+            var selectedImages = GetSelectedImages();
+
+            if (0 == selectedImages.Count())
+            {
+                MessageBox.Show(
+                    Properties.strings.NoPictureCheckedErrorStr,
+                    Properties.strings.ErrorStr,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                return;
+            }
+            WriteLog($"Exporting {selectedImages.Count()} images...");
+
+            string folderSavePath = SelectTriFolder();
             WriteLog($"Saving to '{folderSavePath}'");
             Console.WriteLine($"Saving to '{folderSavePath}'");
 
+            // Show processing... form
             Cursor.Current = Cursors.WaitCursor;
-            frmProcessing frm = new frmProcessing();
-            frm.SetText(Properties.strings.txtProcessingExport);
-            frm.Show();
+            frmProcessing frmProgress = new frmProcessing();
+            frmProgress.SetText(Properties.strings.txtProcessingExport);
+            frmProgress.Show();
 
+            // Information set for exported images. Image name may change, so need to create a new one
             Dictionary<string, ImageInfo> exportedImages = new Dictionary<string, ImageInfo>();
             int ctr = 0;
             int max = selectedImages.Count();
-            foreach (var file in selectedImages)
+            foreach (KeyValuePair<string, ImageInfo> file in selectedImages)
             {
-                string newFileName = file.Key;
-                if (file.Value.DateTimeTaken != DateTime.MinValue)
-                {
-                    // Datetime available. Rename
-                    newFileName =
-                        $"img_{file.Value.DateTimeTaken.ToString("yyyyMMdd_HHmmss")}{Path.GetExtension(file.Key)}";
-                }
-                else
-                {
-                    newFileName = "__" + newFileName;
-                }
+                string newFileName = RenameFileFromDate(file);
                 string srcPath = Path.Combine(SelectedFolder, file.Key);
-                string destPath_base = Path.Combine(folderSavePath, newFileName);
-                // While file exists, increment a counter
-                int i = 0;
-                string ext = Path.GetExtension(destPath_base);
-                string destPath = destPath_base;
-                while (File.Exists(destPath))
-                {
-                    i++;
-                    destPath = Path.Combine(
-                        folderSavePath,
-                        $"{Path.GetFileNameWithoutExtension(destPath_base)}_{i}{ext}"
-                    );
-                }
-                File.Copy(srcPath, destPath, false);
-                string acceptedFileName = Path.GetFileName(destPath);
-                // Also copy image info dateTime
-                if (!exportedImages.ContainsKey(acceptedFileName))
-                    exportedImages.Add(acceptedFileName, file.Value);
+                string destPath = DetermineFileDestinationPath(folderSavePath, newFileName);
+                string acceptedFinalFileName = Path.GetFileName(destPath); // The filename with eventual suffixes
 
+                File.Copy(srcPath, destPath, overwrite: false);
+                // Also copy image info dateTime
+                if (!exportedImages.ContainsKey(acceptedFinalFileName))
+                    exportedImages.Add(acceptedFinalFileName, file.Value);
+                else
+                    WriteLog(
+                        $"Image key already present in save... '{acceptedFinalFileName}'",
+                        Logger.LogLevels.Error
+                    );
+
+                // Progress counter
                 ctr++;
-                frm.SetCounter(ctr, max);
+                frmProgress.SetCounter(ctr, max);
             }
 
             // Save the exportedImages informations
-            string savePath = Path.Combine(folderSavePath, saveFileName);
-            if (File.Exists(savePath))
-                File.SetAttributes(savePath, FileAttributes.Normal);
+            string configSavePath = Path.Combine(folderSavePath, saveFileName);
+            if (File.Exists(configSavePath))
+                File.SetAttributes(configSavePath, FileAttributes.Normal); // Need to unhide in order to delete/overwrite
 
             SettingsManager.SaveTo(
-                savePath,
+                configSavePath,
                 exportedImages,
                 backup: SettingsManager.BackupMode.dotBak,
                 indent: INDENT_SAVE_FILE,
@@ -899,10 +1073,10 @@ namespace PictureSorter
                 zipFile: false
             );
 
-            frm.Close();
+            frmProgress.Close();
             Cursor.Current = Cursors.Default;
 
-            WriteLog($"Progres saved to '${savePath}'");
+            WriteLog($"Progres saved to '${configSavePath}'");
             Console.WriteLine("Saved !");
 
             WriteLog("Exporting complete !");
