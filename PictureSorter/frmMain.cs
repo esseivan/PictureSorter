@@ -15,7 +15,6 @@ using System.Drawing.Imaging;
 using System.Text;
 using System.Drawing;
 using System.Text.RegularExpressions;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace PictureSorter
 {
@@ -391,21 +390,12 @@ namespace PictureSorter
             }
         }
 
-        private DateTime GetDateFromName(string name)
+        private DateTime ExtractDatetime(string dateTimeStr, string format)
         {
-            Regex regex = new Regex("^.*(\\d{8}.\\d{6}).*$");
-            Match result = regex.Match(name);
-            if (!result.Success)
-            {
-                return DateTime.MinValue;
-            }
-
             // Parse
-            string dateTimeStr = result.Groups[1].Value;
-            dateTimeStr = dateTimeStr.Remove(8, 1);
             bool success = DateTime.TryParseExact(
                 dateTimeStr,
-                "yyyyMMddHHmmss",
+                format,
                 CultureInfo.InvariantCulture,
                 DateTimeStyles.None,
                 out DateTime date
@@ -416,6 +406,29 @@ namespace PictureSorter
             }
 
             return date;
+        }
+
+        private DateTime GetDateFromName(string name)
+        {
+            Regex regex = new Regex("^.*(?<datetime>\\d{8}.\\d{6}).*$");
+            Match result = regex.Match(name);
+            if (result.Success)
+            {
+                string dateTimeStr = result.Groups["datetime"].Value;
+                dateTimeStr = dateTimeStr.Remove(8, 1);
+                return ExtractDatetime(dateTimeStr, "yyyyMMddHHmmss");
+            }
+
+            regex = new Regex("^.*(?<datetime>\\d{4}.\\d{2}.\\d{2}.\\d{6}).*$");
+            result = regex.Match(name);
+            if (result.Success)
+            {
+                string dateTimeStr = result.Groups["datetime"].Value;
+                dateTimeStr = dateTimeStr.Remove(4, 1).Remove(6, 1).Remove(8, 1);
+                return ExtractDatetime(dateTimeStr, "yyyyMMddHHmmss");
+            }
+
+            return DateTime.MinValue;
         }
 
         /// <summary>
@@ -558,6 +571,7 @@ namespace PictureSorter
         {
             UnlockFolder();
 
+            pictureBox1.Image = null;
             cacheManager.Clear();
             imageInfoCache.Clear();
             imageInfoIndices.Clear();
@@ -846,7 +860,7 @@ namespace PictureSorter
                     destFileName,
                     RenameList
                 ); // Add suffix if necessary
-                FileRenameSet set = new FileRenameSet(srcFileName, destFileName);
+                FileRenameSet set = new FileRenameSet(srcFileName, destPath);
                 RenameList.Add(set);
 
                 // Save to new config
@@ -862,14 +876,30 @@ namespace PictureSorter
                     );
             }
 
-            foreach (FileRenameSet renameSet in RenameList)
+            CloseFolder();
+            Application.DoEvents();
+            try
             {
-                WriteLog($"Renaming {renameSet.src} to {renameSet.dest}...");
-                File.Move(renameSet.src, renameSet.dest);
+                foreach (FileRenameSet renameSet in RenameList)
+                {
+                    WriteLog($"Renaming {renameSet.src} to {renameSet.dest}...");
+                    File.Move(renameSet.src, renameSet.dest);
 
-                // Progress counter
-                ctr++;
-                frmProgress.SetCounter(ctr, max);
+                    // Progress counter
+                    ctr++;
+                    frmProgress.SetCounter(ctr, max);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Unable to rename files... :\n" + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                WriteLog("Error trying to rename files...", Logger.LogLevels.Error);
+                WriteLog(ex.Message, Logger.LogLevels.Error);
             }
 
             // Save the exportedImages informations
@@ -967,7 +997,7 @@ namespace PictureSorter
         )
         {
             string ext = Path.GetExtension(fileName);
-            string destinationPath = fileName;
+            string destinationPath = Path.Combine(destinationFolder, fileName);
             int i = 0;
             var destPaths = renameList.Select((x) => x.dest);
             while (destPaths.Contains(destinationPath))
@@ -1324,5 +1354,20 @@ namespace PictureSorter
         }
 
         #endregion
+
+        private void renameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RenameAllImages();
+        }
+
+        private void voirDossierToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Process.Start(SelectedFolder);
+        }
+
+        private void voirLogsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Process.Start(Logger.Instance.FileOutputPath);
+        }
     }
 }

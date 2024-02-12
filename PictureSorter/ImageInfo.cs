@@ -107,6 +107,7 @@ namespace PictureSorter
 
             Logger.Instance.Write($"[CacheManager] [Decaching] {FullPath}");
             Console.WriteLine($"'{FullPath}' decached");
+            CachedImage.Dispose();
             CachedImage = null;
         }
     }
