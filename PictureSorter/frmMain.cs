@@ -850,7 +850,7 @@ namespace PictureSorter
             Dictionary<string, ImageInfo> newImageConfig = new Dictionary<string, ImageInfo>();
             List<FileRenameSet> RenameList = new List<FileRenameSet>();
             int ctr = 0;
-            int max = selectedImages.Count() * 3;
+            int max = selectedImages.Count() * 2;
             foreach (KeyValuePair<string, ImageInfo> file in selectedImages)
             {
                 string srcFileName = Path.Combine(SelectedFolder, file.Key);
@@ -874,10 +874,6 @@ namespace PictureSorter
                         $"Image key already present in save... '{acceptedFinalFileName}'",
                         Logger.LogLevels.Error
                     );
-
-                // Progress counter
-                ctr++;
-                frmProgress.SetCounter(ctr, max);
             }
 
             CloseFolder();
