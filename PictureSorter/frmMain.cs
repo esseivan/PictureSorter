@@ -809,10 +809,10 @@ namespace PictureSorter
             }
         }
 
-        struct FileRenameSet
+        class FileRenameSet
         {
-            public readonly string src;
-            public readonly string dest;
+            public string src;
+            public string dest;
 
             public FileRenameSet(string src, string dest)
             {
@@ -850,7 +850,7 @@ namespace PictureSorter
             Dictionary<string, ImageInfo> newImageConfig = new Dictionary<string, ImageInfo>();
             List<FileRenameSet> RenameList = new List<FileRenameSet>();
             int ctr = 0;
-            int max = selectedImages.Count();
+            int max = selectedImages.Count() * 3;
             foreach (KeyValuePair<string, ImageInfo> file in selectedImages)
             {
                 string srcFileName = Path.Combine(SelectedFolder, file.Key);
@@ -874,12 +874,42 @@ namespace PictureSorter
                         $"Image key already present in save... '{acceptedFinalFileName}'",
                         Logger.LogLevels.Error
                     );
+
+                // Progress counter
+                ctr++;
+                frmProgress.SetCounter(ctr, max);
             }
 
             CloseFolder();
             Application.DoEvents();
             try
             {
+                // First thing first, rename them to a unique name
+                for (int i = 0; i < RenameList.Count; i++)
+                {
+                    FileRenameSet renameSet = RenameList[i];
+
+                    // generate random name
+                    string myUniqueFileName = $@"{Guid.NewGuid()}";
+                    // get random path
+                    string myRndPath = Path.Combine(
+                        Path.GetDirectoryName(renameSet.src),
+                        myUniqueFileName
+                    );
+                    myRndPath = Path.ChangeExtension(myRndPath, Path.GetExtension(renameSet.src));
+
+                    WriteLog($"Renaming {renameSet.src} to {myRndPath}...");
+                    File.Move(renameSet.src, myRndPath);
+
+                    // Edit rename set
+                    renameSet.src = myRndPath;
+
+                    // Progress counter
+                    ctr++;
+                    frmProgress.SetCounter(ctr, max);
+                }
+
+                // Rename
                 foreach (FileRenameSet renameSet in RenameList)
                 {
                     WriteLog($"Renaming {renameSet.src} to {renameSet.dest}...");
