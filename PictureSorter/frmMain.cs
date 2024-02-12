@@ -119,6 +119,11 @@ namespace PictureSorter
             }
         }
 
+        public bool WriteLog(string str) => Logger.Instance.Write(str);
+
+        public bool WriteLog(string str, Logger.LogLevels level) =>
+            Logger.Instance.Write(str, level);
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -178,7 +183,7 @@ namespace PictureSorter
                 );
 
             Console.WriteLine("Language : " + Properties.Settings.Default.LanguageStr);
-            Logger.Instance.Write("Language : " + Properties.Settings.Default.LanguageStr);
+            WriteLog("Language : " + Properties.Settings.Default.LanguageStr);
 
             Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(
                 Properties.Settings.Default.LanguageStr
@@ -192,7 +197,7 @@ namespace PictureSorter
             Properties.Settings.Default.LanguageStr = languageStr;
             Properties.Settings.Default.Save();
 
-            Logger.Instance.Write("Language change requested...");
+            WriteLog("Language change requested...");
 
             // Restart app
             Application.Restart();
@@ -282,7 +287,7 @@ namespace PictureSorter
                 zipFile: false
             );
 
-            Logger.Instance.Write($"Progres saved to '${savePath}'");
+            WriteLog($"Progres saved to '${savePath}'");
             Console.WriteLine("Saved !");
         }
 
@@ -300,8 +305,8 @@ namespace PictureSorter
             }
             catch (Exception ex)
             {
-                Logger.Instance.Write("Unable to create lock file...", Logger.LogLevels.Fatal);
-                Logger.Instance.Write(ex.Message, Logger.LogLevels.Fatal);
+                WriteLog("Unable to create lock file...", Logger.LogLevels.Fatal);
+                WriteLog(ex.Message, Logger.LogLevels.Fatal);
                 return false;
             }
             return true;
@@ -313,10 +318,10 @@ namespace PictureSorter
         /// <returns>If the folder can be open (no lock file present or user forced)</returns>
         private bool LockFolder()
         {
-            Logger.Instance.Write("Locking folder...");
+            WriteLog("Locking folder...");
             if (File.Exists(lockFilePath))
             {
-                Logger.Instance.Write("Lock file already present...", Logger.LogLevels.Warn);
+                WriteLog("Lock file already present...", Logger.LogLevels.Warn);
                 // Already open from another app, or not properly exited the app
                 // So asking the user if he want to open anyway
                 DialogResult result = MessageBox.Show(
@@ -338,8 +343,8 @@ namespace PictureSorter
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.Write("Failed to delete lock file...", Logger.LogLevels.Error);
-                    Logger.Instance.Write(ex.Message, Logger.LogLevels.Error);
+                    WriteLog("Failed to delete lock file...", Logger.LogLevels.Error);
+                    WriteLog(ex.Message, Logger.LogLevels.Error);
                     MessageBox.Show(
                         Properties.strings.errorLockDeleteFailed,
                         "Error",
@@ -369,12 +374,12 @@ namespace PictureSorter
                 return;
             }
 
-            Logger.Instance.Write("Unlocking folder...", Logger.LogLevels.Debug);
+            WriteLog("Unlocking folder...", Logger.LogLevels.Debug);
 
             string lockFilePath = Path.Combine(SelectedFolder, LOCK_FILENAME);
             if (!File.Exists(lockFilePath))
             {
-                Logger.Instance.Write("No lock file found...", Logger.LogLevels.Error);
+                WriteLog("No lock file found...", Logger.LogLevels.Error);
                 return;
             }
             else
@@ -422,7 +427,7 @@ namespace PictureSorter
             if (!File.Exists(savePath))
                 return;
 
-            Logger.Instance.Write($"Loading progress '{savePath}'");
+            WriteLog($"Loading progress '{savePath}'");
 
             Dictionary<string, ImageInfo> loadedData;
             try
@@ -438,8 +443,8 @@ namespace PictureSorter
             }
             catch (Exception ex)
             {
-                Logger.Instance.Write("Failed to load progress...", Logger.LogLevels.Error);
-                Logger.Instance.Write(ex.Message, Logger.LogLevels.Error);
+                WriteLog("Failed to load progress...", Logger.LogLevels.Error);
+                WriteLog(ex.Message, Logger.LogLevels.Error);
                 MessageBox.Show(
                     "Error loading progress : \n" + ex.Message,
                     "Error",
@@ -458,7 +463,7 @@ namespace PictureSorter
                     imageInfoCache[dataItem.Key].DateTimeTaken = dataItem.Value.DateTimeTaken;
                 }
             }
-            Logger.Instance.Write("Progress loaded");
+            WriteLog("Progress loaded");
         }
 
         #endregion
@@ -489,7 +494,7 @@ namespace PictureSorter
                     }
                 }
             }
-            Logger.Instance.Write($"Date not found in {filePath}", Logger.LogLevels.Error);
+            WriteLog($"Date not found in {filePath}", Logger.LogLevels.Error);
 
             return DateTime.MinValue;
         }
@@ -514,7 +519,7 @@ namespace PictureSorter
                     info.DateTaken = DateTime.MinValue;
 
                     // Handle exceptions (e.g., if the file does not have EXIF information)
-                    Logger.Instance.Write(
+                    WriteLog(
                         $"Unable to retrieve exif for '{filePath}' : {ex.Message}",
                         Logger.LogLevels.Error
                     );
@@ -542,7 +547,7 @@ namespace PictureSorter
         /// </summary>
         private void SortDirectoryContent(string directoryPath)
         {
-            Logger.Instance.Write($"Renaming directory content '{directoryPath}'");
+            WriteLog($"Renaming directory content '{directoryPath}'");
         }
 
         /// <summary>
@@ -568,14 +573,14 @@ namespace PictureSorter
                 return;
 
             CloseFolder();
-            Logger.Instance.Write($"Loading directory '{directoryPath}'");
+            WriteLog($"Loading directory '{directoryPath}'");
 
             SelectedFolder = directoryPath;
             lockFilePath = Path.Combine(SelectedFolder, LOCK_FILENAME);
             if (!LockFolder())
             {
                 SelectedFolder = string.Empty;
-                Logger.Instance.Write($"Couldn't lock folder. Folder not open");
+                WriteLog($"Couldn't lock folder. Folder not open");
                 return;
             }
 
@@ -615,7 +620,7 @@ namespace PictureSorter
             UpdateFromSave(); // Update selection from save
             SaveToFile(); // Save. Maybe more images, maybe no save yet
 
-            Logger.Instance.Write($"Processing missing DateTimeTaken...");
+            WriteLog($"Processing missing DateTimeTaken...");
             frmProcessing frm = new frmProcessing();
             frm.SetText(Properties.strings.txtProcessingLoading);
             frm.Show();
@@ -638,7 +643,7 @@ namespace PictureSorter
                     catch (Exception ex)
                     {
                         // Handle exceptions (e.g., if the file does not have EXIF information)
-                        Logger.Instance.Write(
+                        WriteLog(
                             $"Unable to retrieve exif for '{item.Value.FullPath}' : {ex.Message}",
                             Logger.LogLevels.Error
                         );
@@ -650,9 +655,9 @@ namespace PictureSorter
 
             frm.Close();
             Cursor.Current = Cursors.Default;
-            Logger.Instance.Write($"Processing complete, saving...");
+            WriteLog($"Processing complete, saving...");
             SaveToFile(); // Save. Maybe more images, maybe no save yet
-            Logger.Instance.Write($"Saving complete. Displaying images...");
+            WriteLog($"Saving complete. Displaying images...");
 
             List<ImageInfo> images = imageInfoCache.Values.ToList();
             images.Sort((x, y) => x.DateTimeTaken.CompareTo(y.DateTimeTaken));
@@ -670,7 +675,7 @@ namespace PictureSorter
                 treeView1.SelectedNode = treeView1.Nodes[0];
 
             treeView1.Focus();
-            Logger.Instance.Write($"Directory loading complete !");
+            WriteLog($"Directory loading complete !");
         }
 
         /// <summary>
@@ -710,7 +715,7 @@ namespace PictureSorter
                 );
                 return;
             }
-            Logger.Instance.Write($"Exporting {selectedImages.Count()} images...");
+            WriteLog($"Exporting {selectedImages.Count()} images...");
 
             string directoryName = Path.GetFileName(SelectedFolder);
             // Check if current directory match the sortStr
@@ -734,9 +739,9 @@ namespace PictureSorter
             }
             folderSavePath += counter;
             Directory.CreateDirectory(folderSavePath);
-            Logger.Instance.Write($"Folder choosen : {folderSavePath}");
+            WriteLog($"Folder choosen : {folderSavePath}");
 
-            Logger.Instance.Write($"Saving to '{folderSavePath}'");
+            WriteLog($"Saving to '{folderSavePath}'");
             Console.WriteLine($"Saving to '{folderSavePath}'");
 
             Cursor.Current = Cursors.WaitCursor;
@@ -776,15 +781,15 @@ namespace PictureSorter
             frm.Close();
             Cursor.Current = Cursors.Default;
 
-            Logger.Instance.Write($"Progres saved to '${savePath}'");
+            WriteLog($"Progres saved to '${savePath}'");
             Console.WriteLine("Saved !");
 
-            Logger.Instance.Write("Exporting complete !");
+            WriteLog("Exporting complete !");
             Process.Start(folderSavePath);
 
             if (AppSettingsManager.Instance.OpenFolderInAppAfterExport)
             {
-                Logger.Instance.Write("Openning new folder just after export...");
+                WriteLog("Openning new folder just after export...");
                 LoadImages(folderSavePath);
             }
         }
@@ -806,7 +811,7 @@ namespace PictureSorter
                 );
                 return;
             }
-            Logger.Instance.Write($"Exporting {selectedImages.Count()} images...");
+            WriteLog($"Exporting {selectedImages.Count()} images...");
 
             string directoryName = Path.GetFileName(SelectedFolder);
             // Check if current directory match the sortStr
@@ -830,9 +835,9 @@ namespace PictureSorter
             }
             folderSavePath += counter;
             Directory.CreateDirectory(folderSavePath);
-            Logger.Instance.Write($"Folder choosen : {folderSavePath}");
+            WriteLog($"Folder choosen : {folderSavePath}");
 
-            Logger.Instance.Write($"Saving to '{folderSavePath}'");
+            WriteLog($"Saving to '{folderSavePath}'");
             Console.WriteLine($"Saving to '{folderSavePath}'");
 
             Cursor.Current = Cursors.WaitCursor;
@@ -897,15 +902,15 @@ namespace PictureSorter
             frm.Close();
             Cursor.Current = Cursors.Default;
 
-            Logger.Instance.Write($"Progres saved to '${savePath}'");
+            WriteLog($"Progres saved to '${savePath}'");
             Console.WriteLine("Saved !");
 
-            Logger.Instance.Write("Exporting complete !");
+            WriteLog("Exporting complete !");
             Process.Start(folderSavePath);
 
             if (AppSettingsManager.Instance.OpenFolderInAppAfterExport)
             {
-                Logger.Instance.Write("Openning new folder just after export...");
+                WriteLog("Openning new folder just after export...");
                 LoadImages(folderSavePath);
             }
         }
@@ -944,18 +949,18 @@ namespace PictureSorter
             string path;
             if ((index > 0) && CacheManager.CACHE_MAX_SIZE >= 3) // only if 3 or more
             {
-                Logger.Instance.Write("Caching previous");
+                WriteLog("Caching previous");
                 path = imageInfoIndices[index - 1];
                 toCache.Add(imageInfoCache[path]);
             }
 
-            Logger.Instance.Write($"Caching current, index={index}");
+            WriteLog($"Caching current, index={index}");
             path = imageInfoIndices[index];
             toCache.Add(imageInfoCache[path]);
 
             if (((index + 1) < maxIndex) && CacheManager.CACHE_MAX_SIZE >= 2) // only if 2 or more
             {
-                Logger.Instance.Write("Caching next");
+                WriteLog("Caching next");
                 path = imageInfoIndices[index + 1];
                 toCache.Add(imageInfoCache[path]);
             }
@@ -969,9 +974,9 @@ namespace PictureSorter
         /// <summary>
         /// Renommer les images en fonction de la date où elles ont été prises
         /// </summary>
-        private void renommerLesImagesToolStripMenuItem_Click(object sender, EventArgs e)
+        private void renameExportToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            RenameImages();
+            ExportAndRenameSelectedImages();
         }
 
         /// <summary>
@@ -979,7 +984,7 @@ namespace PictureSorter
         /// </summary>
         private void quitterToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Logger.Instance.Write("Application Closing...");
+            WriteLog("Application Closing...");
             Close();
         }
 
@@ -1140,7 +1145,7 @@ namespace PictureSorter
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Logger.Instance.Write("Application Closing...");
+            WriteLog("Application Closing...");
             UnlockFolder();
         }
 
