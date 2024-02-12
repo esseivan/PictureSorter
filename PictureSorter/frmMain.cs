@@ -998,15 +998,15 @@ namespace PictureSorter
         {
             string ext = Path.GetExtension(fileName);
             string destinationPath = Path.Combine(destinationFolder, fileName);
-            int i = 0;
+            int i = 2;
             var destPaths = renameList.Select((x) => x.dest);
             while (destPaths.Contains(destinationPath))
             {
-                i++;
                 destinationPath = Path.Combine(
                     destinationFolder,
                     $"{Path.GetFileNameWithoutExtension(fileName)}_{i}{ext}"
                 );
+                i++;
             }
 
             return destinationPath;
@@ -1020,15 +1020,15 @@ namespace PictureSorter
         private string DetermineFileDestinationPath(string destinationFolder, string fileName)
         {
             string ext = Path.GetExtension(fileName);
-            string destinationPath = fileName;
-            int i = 0;
+            string destinationPath = Path.Combine(destinationFolder, fileName);
+            int i = 2;
             while (File.Exists(destinationPath))
             {
-                i++;
                 destinationPath = Path.Combine(
                     destinationFolder,
                     $"{Path.GetFileNameWithoutExtension(fileName)}_{i}{ext}"
                 );
+                i++;
             }
 
             return destinationPath;
