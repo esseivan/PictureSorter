@@ -35,6 +35,9 @@ if (Test-Path $outDir) {
     Remove-Item -Path $outDir -Recurse
 }
 
+# Call msbuild clean
+& $msBuildPath /target:clean /p:Configuration=Release
+
 # Publish the application.
 Push-Location $projDir
 try {
