@@ -35,13 +35,10 @@ if (Test-Path $outDir) {
     Remove-Item -Path $outDir -Recurse
 }
 
-# Call msbuild clean
-& $msBuildPath /target:clean /p:Configuration=Release
-
 # Manually delete /bin and /obj directories. Check that directories exist first.
-if (Test-Path "$projDir/bin") {
-    Remove-Item -Path "$projDir/bin" -Recurse
-}
+#if (Test-Path "$projDir/bin") {
+#    Remove-Item -Path "$projDir/bin" -Recurse
+#}
 if (Test-Path "$projDir/obj") {
     Remove-Item -Path "$projDir/obj" -Recurse
 }
