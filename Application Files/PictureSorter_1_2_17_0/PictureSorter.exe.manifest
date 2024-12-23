@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <asmv1:assembly xsi:schemaLocation="urn:schemas-microsoft-com:asm.v1 assembly.adaptive.xsd" manifestVersion="1.0" xmlns:asmv1="urn:schemas-microsoft-com:asm.v1" xmlns="urn:schemas-microsoft-com:asm.v2" xmlns:asmv2="urn:schemas-microsoft-com:asm.v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:co.v1="urn:schemas-microsoft-com:clickonce.v1" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3" xmlns:dsig="http://www.w3.org/2000/09/xmldsig#" xmlns:co.v2="urn:schemas-microsoft-com:clickonce.v2">
-  <asmv1:assemblyIdentity name="PictureSorter.exe" version="1.2.9.0" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
+  <asmv1:assemblyIdentity name="PictureSorter.exe" version="1.2.17.0" publicKeyToken="0000000000000000" language="neutral" processorArchitecture="msil" type="win32" />
   <description asmv2:iconFile="logo.ico" xmlns="urn:schemas-microsoft-com:asm.v1" />
   <application />
   <entryPoint>
@@ -50,7 +50,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>nW00+PK1MyHEQIgFffoYi0Kf1UAuWb4TRE/nL4rwXVE=</dsig:DigestValue>
+        <dsig:DigestValue>N+uaovg35JF490Csx/Fw2zZl78poEeQ/IrxZE8Dhd5Q=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -67,14 +67,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Microsoft.Bcl.AsyncInterfaces.dll" size="26752">
-      <assemblyIdentity name="Microsoft.Bcl.AsyncInterfaces" version="7.0.0.0" publicKeyToken="CC7B13FFCD2DDD51" language="neutral" processorArchitecture="msil" />
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Microsoft.Bcl.AsyncInterfaces.dll" size="26376">
+      <assemblyIdentity name="Microsoft.Bcl.AsyncInterfaces" version="9.0.0.0" publicKeyToken="CC7B13FFCD2DDD51" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>XcNyoQ80Wx8A7GqPoaLOVp9+XWPk8fhjG+Nn5Gv6NPQ=</dsig:DigestValue>
+        <dsig:DigestValue>HJWxp3aTHKHE8pEbKuHMmet49UfNX+6vXNvfEM7a0Ns=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -103,14 +103,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="PictureSorter.exe" size="132096">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="PictureSorter.exe" size="131584">
       <assemblyIdentity name="PictureSorter" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>x8CeRMi879t4w0o2xU11Lu2i2i4uCjBDB3IFxM/NcLs=</dsig:DigestValue>
+        <dsig:DigestValue>1sJux+Dl6Ipq+iP3y1zek5udTqzxAQBFInNr0df5MBg=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -122,7 +122,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>/ui+94hPP5ZukiKNGWdh7X9DZhA9g37UqediL3/gGjs=</dsig:DigestValue>
+        <dsig:DigestValue>7vSrj1pBK1G9VdEUVBchTRR6dCAm4W+RrE8M4thG3P8=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -134,7 +134,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>J4jXOmuRPZn5fD65Y/AeaHCKYLGopipPjccP2wMQC80=</dsig:DigestValue>
+        <dsig:DigestValue>TQFHQKS8aa9zCDzKlQhjAVEhvxZKLPpXKesvwxmh1Cg=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -147,6 +147,18 @@
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
         <dsig:DigestValue>rMzPvkXZ8I/+7ZkW43sz6YxlvgEs//bn+ntnIQzh/vs=</dsig:DigestValue>
+      </hash>
+    </dependentAssembly>
+  </dependency>
+  <dependency>
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="System.IO.Pipelines.dll" size="84792">
+      <assemblyIdentity name="System.IO.Pipelines" version="9.0.0.0" publicKeyToken="CC7B13FFCD2DDD51" language="neutral" processorArchitecture="msil" />
+      <hash>
+        <dsig:Transforms>
+          <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+        </dsig:Transforms>
+        <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
+        <dsig:DigestValue>2IG14BxSe7fK+jwkgvfL+/FY/Ltvk++0OBtjjC1Opvc=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -187,26 +199,26 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="System.Text.Encodings.Web.dll" size="78976">
-      <assemblyIdentity name="System.Text.Encodings.Web" version="7.0.0.0" publicKeyToken="CC7B13FFCD2DDD51" language="neutral" processorArchitecture="msil" />
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="System.Text.Encodings.Web.dll" size="79664">
+      <assemblyIdentity name="System.Text.Encodings.Web" version="9.0.0.0" publicKeyToken="CC7B13FFCD2DDD51" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>x5K/4/Q8iU4gM5JS0VmpaiDMxuEzIrLTglcP+Xk55QE=</dsig:DigestValue>
+        <dsig:DigestValue>rWvkvn4Bg/PqusP3R7g0xVcVaULH0s4SA5R3rQh0+/s=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="System.Text.Json.dll" size="582320">
-      <assemblyIdentity name="System.Text.Json" version="7.0.0.3" publicKeyToken="CC7B13FFCD2DDD51" language="neutral" processorArchitecture="msil" />
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="System.Text.Json.dll" size="726320">
+      <assemblyIdentity name="System.Text.Json" version="9.0.0.0" publicKeyToken="CC7B13FFCD2DDD51" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>0U28NPaCR1fm9q51iwX3bER/lvjXW+PEuChvzFo4izA=</dsig:DigestValue>
+        <dsig:DigestValue>6tQTfRt+0G1V9gms/t/a0EGXewKanSx+i1lvaY/t2Kw=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
@@ -255,13 +267,13 @@
       <dsig:DigestValue>O/MIPWGKQ91ANzyYKrZDAQ6htPEV5eSeojS22ygUTmQ=</dsig:DigestValue>
     </hash>
   </file>
-  <file name="PictureSorter.exe.config" size="1686">
+  <file name="PictureSorter.exe.config" size="1659">
     <hash>
       <dsig:Transforms>
         <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
       </dsig:Transforms>
       <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-      <dsig:DigestValue>KTg7IkswB8KyRORuwiEacA36Iljxl1wE7r7qVC6Buz8=</dsig:DigestValue>
+      <dsig:DigestValue>797zSYE3Z3LeTBH47USFEARGSNpLpRcYbehnuWPgPpM=</dsig:DigestValue>
     </hash>
   </file>
 </asmv1:assembly>
