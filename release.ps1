@@ -36,9 +36,9 @@ if (Test-Path $outDir) {
 }
 
 # Manually delete /bin and /obj directories. Check that directories exist first.
-#if (Test-Path "$projDir/bin") {
-#    Remove-Item -Path "$projDir/bin" -Recurse
-#}
+if (Test-Path "$projDir/bin") {
+    Remove-Item -Path "$projDir/bin" -Recurse
+}
 if (Test-Path "$projDir/obj") {
     Remove-Item -Path "$projDir/obj" -Recurse
 }
