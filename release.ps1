@@ -47,7 +47,7 @@ if (Test-Path "$projDir/obj") {
 Push-Location $projDir
 try {
     Write-Output "Restoring:"
-    dotnet restore -r win-x64
+    dotnet restore -r win
     Write-Output "Publishing:"
     $msBuildVerbosityArg = "/v:m"
     if ($env:CI) {
