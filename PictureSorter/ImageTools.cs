@@ -66,6 +66,8 @@ namespace PictureSorter
             float borderSizePercent
         )
         {
+            return image;
+
             if (borderSizePercent < 0)
                 throw new ArgumentOutOfRangeException(
                     "borderSize",
@@ -116,6 +118,8 @@ namespace PictureSorter
             float borderSizePercent
         )
         {
+            return image;
+
             if (borderSizePercent < 0)
                 throw new ArgumentOutOfRangeException(
                     "borderSize",

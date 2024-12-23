@@ -218,6 +218,8 @@ namespace PictureSorter
 
             UpdateIsSelectedBackground();
 
+            Application.DoEvents();
+
             // Update picturebox image (border)
             pictureBox1.Image = selectedImageInfo.ReapplyBorder(pictureBox1.Image);
             GC.Collect();
@@ -1296,6 +1298,8 @@ namespace PictureSorter
             // Set the picturebox image. Generally cached
             Image img = selectedImageInfo.GetImageAndCache();
 
+            UpdateIsSelectedBackground();
+
             img = ImageTools.applyBorderToImage(
                 img,
                 selectedImageInfo.IsSelected ? ImageInfo.colorSelected : ImageInfo.colorNotSelected,
@@ -1303,7 +1307,7 @@ namespace PictureSorter
             );
             pictureBox1.Image = img;
 
-            UpdateIsSelectedBackground();
+            Application.DoEvents();
 
             CacheAsync();
         }
